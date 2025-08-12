@@ -477,7 +477,7 @@ const InstructorsPage: React.FC = () => {
   };
 
   const handleViewProfile = (instructor: any) => {
-    toast.info(`Переход к профилю ${instructor.name}`);
+    toast(`Переход к профилю ${instructor.name}`);
   };
 
   const totalInstructors = instructors.length;

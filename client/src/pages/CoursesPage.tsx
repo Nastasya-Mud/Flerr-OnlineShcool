@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import styled from 'styled-components';
 import { Search, Filter, Star, Clock, Users, BookOpen, ChevronRight, Play } from 'lucide-react';
+import { Button, Card, CardHeader, CardBody, CardFooter, CardImage, CardBadge, Input, Loading } from '../components/UI';
+import { useQuery } from 'react-query';
+import { coursesAPI } from '../api/courses';
+import type { Course } from '../../../shared/types';
 
 const Container = styled.div`
   padding: var(--spacing-xxl) 0;
@@ -49,32 +53,9 @@ const FiltersGrid = styled.div`
   }
 `;
 
-const SearchInput = styled.div`
+const SearchInputWrapper = styled.div`
   position: relative;
-  
-  input {
-    width: 100%;
-    padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) 2.5rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-md);
-    font-size: 1rem;
-    background: white;
-    transition: all 0.2s ease;
-    
-    &:focus {
-      outline: none;
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 3px rgba(128, 0, 128, 0.1);
-    }
-  }
-  
-  svg {
-    position: absolute;
-    left: var(--spacing-sm);
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--color-text-muted);
-  }
+  width: 100%;
 `;
 
 const Select = styled.select`
@@ -90,6 +71,13 @@ const Select = styled.select`
     outline: none;
     border-color: var(--color-primary);
   }
+`;
+
+const Toolbar = styled.div`
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+  margin-bottom: var(--spacing-md);
 `;
 
 const CoursesGrid = styled.div`
@@ -282,127 +270,70 @@ const LoadingSpinner = styled.div`
 `;
 
 const CoursesPage: React.FC = () => {
-  const [courses, setCourses] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [levelFilter, setLevelFilter] = useState('');
-  const [sortBy, setSortBy] = useState('createdAt');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState<string>(searchParams.get('q') || '');
+  const [debouncedSearch, setDebouncedSearch] = useState<string>(searchParams.get('q') || '');
+  const [categoryFilter, setCategoryFilter] = useState<string>(searchParams.get('category') || '');
+  const [levelFilter, setLevelFilter] = useState<string>(searchParams.get('level') || '');
+  const [sortBy, setSortBy] = useState<'createdAt' | 'price' | 'rating' | 'students'>(
+    (searchParams.get('sort') as any) || 'createdAt'
+  );
+  const [page, setPage] = useState<number>(Number(searchParams.get('page') || 1));
+  const [limit] = useState(12);
 
-  // Моковые данные для демонстрации
-  const mockCourses = [
-    {
-      _id: '1',
-      title: 'Профессия флорист',
-      slug: 'florist-profession',
-      description: 'Полный курс для начинающих флористов. Изучите основы композиции, работу с цветами и создание букетов.',
-      price: 25000,
-      originalPrice: 30000,
-      image: '/images/course-1.jpg',
-      duration: '3 месяца',
-      level: 'beginner',
-      category: 'profession',
-      rating: 4.8,
-      studentsCount: 156,
-      lessonsCount: 24,
-    },
-    {
-      _id: '2',
-      title: 'Флорист-дизайнер',
-      slug: 'florist-designer',
-      description: 'Продвинутый курс для создания уникальных композиций и работы с современными техниками флористики.',
-      price: 35000,
-      originalPrice: 40000,
-      image: '/images/course-2.jpg',
-      duration: '4 месяца',
-      level: 'intermediate',
-      category: 'design',
-      rating: 4.9,
-      studentsCount: 89,
-      lessonsCount: 32,
-    },
-    {
-      _id: '3',
-      title: 'Интерьерные композиции',
-      slug: 'interior-compositions',
-      description: 'Создание композиций из сухих и искусственных цветов для украшения интерьера.',
-      price: 20000,
-      originalPrice: 25000,
-      image: '/images/course-3.jpg',
-      duration: '2 месяца',
-      level: 'intermediate',
-      category: 'interior',
-      rating: 4.7,
-      studentsCount: 203,
-      lessonsCount: 18,
-    },
-    {
-      _id: '4',
-      title: 'Коммерческий флорист',
-      slug: 'commercial-florist',
-      description: 'Базовый курс для работы в цветочных магазинах и создания коммерческих букетов.',
-      price: 18000,
-      originalPrice: 22000,
-      image: '/images/course-4.jpg',
-      duration: '2.5 месяца',
-      level: 'beginner',
-      category: 'commercial',
-      rating: 4.6,
-      studentsCount: 134,
-      lessonsCount: 20,
-    },
-    {
-      _id: '5',
-      title: 'Свадебная флористика',
-      slug: 'wedding-floristry',
-      description: 'Мастер-классы по созданию свадебных букетов и украшений для торжественных мероприятий.',
-      price: 28000,
-      originalPrice: 32000,
-      image: '/images/course-5.jpg',
-      duration: '3 месяца',
-      level: 'advanced',
-      category: 'wedding',
-      rating: 4.9,
-      studentsCount: 67,
-      lessonsCount: 28,
-    },
-  ];
+  // Debounce для поиска
+  React.useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(searchTerm), 400);
+    return () => clearTimeout(id);
+  }, [searchTerm]);
 
-  useEffect(() => {
-    // Имитация загрузки данных
-    setTimeout(() => {
-      setCourses(mockCourses);
-      setLoading(false);
-    }, 1000);
-  }, []);
+  const mapSort = (val: string) => {
+    if (val === 'students') return 'popularity';
+    if (val === 'price') return 'price';
+    if (val === 'createdAt') return 'createdAt';
+    // rating не поддерживается API — используем createdAt как дефолт
+    return 'createdAt';
+  };
 
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !categoryFilter || course.category === categoryFilter;
-    const matchesLevel = !levelFilter || course.level === levelFilter;
-    
-    return matchesSearch && matchesCategory && matchesLevel;
-  });
+  const { data, isLoading, isError } = useQuery(
+    ['courses', { page, limit, debouncedSearch, categoryFilter, levelFilter, sortBy }],
+    async () => {
+      const res = await coursesAPI.list({
+        page,
+        limit,
+        search: debouncedSearch || undefined,
+        category: categoryFilter || undefined,
+        level: (levelFilter as any) || undefined,
+        sort: mapSort(sortBy) as any,
+        order: 'desc',
+      });
+      return res.data;
+    },
+    { keepPreviousData: true }
+  );
 
-  const sortedCourses = [...filteredCourses].sort((a, b) => {
-    switch (sortBy) {
-      case 'price':
-        return a.price - b.price;
-      case 'rating':
-        return b.rating - a.rating;
-      case 'students':
-        return b.studentsCount - a.studentsCount;
-      default:
-        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
-    }
-  });
+  const courses: Course[] = data?.data ?? [];
+  const pagination = data?.pagination;
+
+  // Sync state -> URL
+  React.useEffect(() => {
+    const next = new URLSearchParams();
+    if (searchTerm) next.set('q', searchTerm);
+    if (categoryFilter) next.set('category', categoryFilter);
+    if (levelFilter) next.set('level', levelFilter);
+    if (sortBy && sortBy !== 'createdAt') next.set('sort', sortBy);
+    if (page && page !== 1) next.set('page', String(page));
+    setSearchParams(next, { replace: true });
+  }, [searchTerm, categoryFilter, levelFilter, sortBy, page, setSearchParams]);
+
+  // Локальная сортировка и фильтрация больше не нужны — это делает API
+  const sortedCourses = courses;
 
   const getDiscountPercentage = (original: number, current: number) => {
     return Math.round(((original - current) / original) * 100);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Container>
         <LoadingSpinner />
@@ -421,18 +352,35 @@ const CoursesPage: React.FC = () => {
       </Header>
 
       <FiltersSection>
+        <Toolbar>
+          <Button
+            onClick={() => {
+              setSearchTerm('');
+              setCategoryFilter('');
+              setLevelFilter('');
+              setSortBy('createdAt');
+              setPage(1);
+            }}
+            variant="secondary"
+          >
+            Сбросить фильтры
+          </Button>
+        </Toolbar>
         <FiltersGrid>
-          <SearchInput>
+          <SearchInputWrapper>
             <Search size={20} />
-            <input
+            <Input
               type="text"
               placeholder="Поиск курсов..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
             />
-          </SearchInput>
+          </SearchInputWrapper>
           
-          <Select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+          <Select value={categoryFilter} onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}>
             <option value="">Все категории</option>
             <option value="profession">Профессия</option>
             <option value="design">Дизайн</option>
@@ -441,14 +389,14 @@ const CoursesPage: React.FC = () => {
             <option value="wedding">Свадьба</option>
           </Select>
           
-          <Select value={levelFilter} onChange={(e) => setLevelFilter(e.target.value)}>
+          <Select value={levelFilter} onChange={(e) => { setLevelFilter(e.target.value); setPage(1); }}>
             <option value="">Все уровни</option>
             <option value="beginner">Начинающий</option>
             <option value="intermediate">Средний</option>
             <option value="advanced">Продвинутый</option>
           </Select>
           
-          <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <Select value={sortBy} onChange={(e) => { setSortBy(e.target.value as any); setPage(1); }}>
             <option value="createdAt">По дате</option>
             <option value="price">По цене</option>
             <option value="rating">По рейтингу</option>
@@ -458,7 +406,12 @@ const CoursesPage: React.FC = () => {
       </FiltersSection>
 
       <AnimatePresence mode="wait">
-        {sortedCourses.length > 0 ? (
+        {isError ? (
+          <EmptyState>
+            <h3>Ошибка загрузки</h3>
+            <p>Попробуйте обновить страницу или позже.</p>
+          </EmptyState>
+        ) : sortedCourses.length > 0 ? (
           <CoursesGrid>
             {sortedCourses.map((course, index) => (
               <CourseCard
@@ -479,21 +432,25 @@ const CoursesPage: React.FC = () => {
                   <CourseDescription>{course.description}</CourseDescription>
                   
                   <CourseMeta>
-                    <span>
-                      <Star size={16} />
-                      {course.rating}
-                    </span>
+                    {typeof (course as any).rating !== 'undefined' && (
+                      <span>
+                        <Star size={16} />
+                        {(course as any).rating}
+                      </span>
+                    )}
                     <span>
                       <Clock size={16} />
                       {course.duration}
                     </span>
-                    <span>
-                      <Users size={16} />
-                      {course.studentsCount} студентов
-                    </span>
+                    {typeof (course as any).studentsCount !== 'undefined' && (
+                      <span>
+                        <Users size={16} />
+                        {(course as any).studentsCount} студентов
+                      </span>
+                    )}
                     <span>
                       <BookOpen size={16} />
-                      {course.lessonsCount} уроков
+                      {(course.lessons?.length ?? 0)} уроков
                     </span>
                   </CourseMeta>
                   
@@ -523,6 +480,20 @@ const CoursesPage: React.FC = () => {
           </EmptyState>
         )}
       </AnimatePresence>
+
+      {pagination && (pagination.totalPages > 1) && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1rem' }}>
+          <Button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={!pagination.hasPrev}>
+            Назад
+          </Button>
+          <span style={{ alignSelf: 'center' }}>
+            Страница {pagination.page} из {pagination.totalPages}
+          </span>
+          <Button onClick={() => setPage((p) => p + 1)} disabled={!pagination.hasNext}>
+            Далее
+          </Button>
+        </div>
+      )}
     </Container>
   );
 };

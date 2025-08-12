@@ -191,11 +191,28 @@ export interface AuthResponse {
 export interface Theme {
   colors: {
     primary: string;
+    purple?: string;
     secondary: string;
+    charlotte?: string;
     accent: string;
+    lavender?: string;
+    lightLavender?: string;
     background: string;
+    backgroundSecondary: string;
+    backgroundTertiary?: string;
     text: string;
     textLight: string;
+    textMuted: string;
+    success: string;
+    warning: string;
+    error: string;
+    info: string;
+    gradientPrimary: string;
+    gradientSecondary: string;
+    gradientAccent: string;
+    hoverPrimary: string;
+    hoverSecondary: string;
+    hoverAccent: string;
   };
   fonts: {
     primary: string;
@@ -207,12 +224,33 @@ export interface Theme {
     md: string;
     lg: string;
     xl: string;
+    xxl: string;
   };
   borderRadius: {
     sm: string;
     md: string;
     lg: string;
+    xl: string;
   };
+  shadows: {
+    sm: string;
+    md: string;
+    lg: string;
+    xl: string;
+  };
+  transitions: {
+    fast: string;
+    normal: string;
+    slow: string;
+  };
+  breakpoints: {
+    xs: string;
+    sm: string;
+    md: string;
+    lg: string;
+    xl: string;
+  };
+  animations: Record<string, any>;
 }
 
 // Animation типы

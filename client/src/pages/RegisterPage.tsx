@@ -586,7 +586,7 @@ const RegisterPage: React.FC = () => {
           <span>или</span>
         </Divider>
 
-        <SocialButton type="button" onClick={() => toast.info('Функция в разработке')}>
+        <SocialButton type="button" onClick={() => toast('Функция в разработке')}>
           Зарегистрироваться через Google
         </SocialButton>
 

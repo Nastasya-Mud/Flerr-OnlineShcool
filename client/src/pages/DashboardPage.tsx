@@ -168,14 +168,14 @@ const SectionTitle = styled.h2`
   gap: var(--spacing-sm);
 `;
 
-const RecentCourses = styled.div`
+const RecentCourses = styled(motion.div)`
   background: white;
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-md);
   overflow: hidden;
 `;
 
-const CourseItem = styled.div`
+const CourseItem = styled(motion.div)`
   padding: var(--spacing-lg);
   border-bottom: 1px solid var(--color-border);
   transition: all 0.2s ease;
@@ -646,13 +646,8 @@ const DashboardPage: React.FC = () => {
               
               <ActivityCard>
                 <AnimatePresence mode="wait">
-                  {activities.map((activity, index) => (
-                    <ActivityItem
-                      key={activity._id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                    >
+                    {activities.map((activity, index) => (
+                    <ActivityItem key={activity._id}>
                       <ActivityIcon $type={activity.type}>
                         <activity.icon size={20} />
                       </ActivityIcon>

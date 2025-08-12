@@ -19,6 +19,10 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    fs: {
+      // Разрешаем импорт файлов из корня репозитория (для `shared/types`)
+      allow: ['..']
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:5000',

@@ -551,7 +551,7 @@ const SuppliersPage: React.FC = () => {
   };
 
   const handleViewCatalog = (supplier: any) => {
-    toast.info(`Переход к каталогу ${supplier.name}`);
+    toast(`Переход к каталогу ${supplier.name}`);
   };
 
   const totalSuppliers = suppliers.length;

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React from 'react';
+import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import styled from 'styled-components';
 import { 
@@ -8,6 +8,9 @@ import {
   Calendar, MapPin, Phone, Mail, Globe, Instagram, Facebook 
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useQuery } from 'react-query';
+import { coursesAPI } from '../api/courses';
+import type { Course } from '../../../shared/types';
 import toast from 'react-hot-toast';
 
 const Container = styled.div`
@@ -409,112 +412,16 @@ const SocialLinks = styled.div`
 const CourseDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { isAuthenticated } = useAuth();
-  const [course, setCourse] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isEnrolled, setIsEnrolled] = React.useState(false);
 
-  // Моковые данные для демонстрации
-  const mockCourse = {
-    _id: '1',
-    title: 'Профессия флорист',
-    slug: 'florist-profession',
-    description: 'Полный курс для начинающих флористов. Изучите основы композиции, работу с цветами и создание букетов. Курс включает практические занятия и бонусные уроки по бизнесу и социальным сетям.',
-    shortDescription: 'Станьте профессиональным флористом с нуля',
-    price: 25000,
-    originalPrice: 30000,
-    image: '/images/course-1.jpg',
-    videoPreview: '/videos/course-preview.mp4',
-    duration: '3 месяца',
-    level: 'beginner',
-    category: 'profession',
-    rating: 4.8,
-    studentsCount: 156,
-    lessonsCount: 24,
-    instructor: {
-      _id: '1',
-      name: 'Анна Петрова',
-      avatar: '/images/instructor-1.jpg',
-      bio: 'Профессиональный флорист с 10-летним опытом работы. Основатель студии "Цветочная мастерская".',
-      experience: 10,
-      rating: 4.9,
-      socialMedia: {
-        instagram: '@anna_florist',
-        facebook: 'anna.petrovna',
-        website: 'www.annaflorist.com'
-      }
+  const { data, isLoading, isError } = useQuery(
+    ['course', slug],
+    async () => {
+      const res = await coursesAPI.getBySlug(slug!);
+      return res.data.data as Course;
     },
-    lessons: [
-      {
-        _id: '1',
-        title: 'Введение в флористику',
-        description: 'Основные принципы и инструменты флориста',
-        duration: '45 мин',
-        isFree: true,
-        isCompleted: false
-      },
-      {
-        _id: '2',
-        title: 'Основы композиции',
-        description: 'Изучаем принципы создания гармоничных композиций',
-        duration: '60 мин',
-        isFree: false,
-        isCompleted: false
-      },
-      {
-        _id: '3',
-        title: 'Работа с цветами',
-        description: 'Правила обработки и подготовки цветов',
-        duration: '75 мин',
-        isFree: false,
-        isCompleted: false
-      },
-      {
-        _id: '4',
-        title: 'Создание букетов',
-        description: 'Практическое занятие по созданию букетов',
-        duration: '90 мин',
-        isFree: false,
-        isCompleted: false
-      }
-    ],
-    features: [
-      {
-        title: 'Практические занятия',
-        description: 'Каждый урок включает практические задания'
-      },
-      {
-        title: 'Бонусные уроки',
-        description: 'Уроки по бизнесу и продвижению в соцсетях'
-      },
-      {
-        title: 'Сертификат',
-        description: 'Получите сертификат по завершении курса'
-      },
-      {
-        title: 'Поддержка',
-        description: 'Индивидуальная поддержка от преподавателя'
-      }
-    ],
-    requirements: [
-      'Желание учиться и развиваться',
-      'Базовые навыки работы с компьютером',
-      'Доступ к интернету'
-    ],
-    outcomes: [
-      'Создание профессиональных композиций',
-      'Знание основ флористики',
-      'Навыки ведения бизнеса',
-      'Умение продвигать себя в соцсетях'
-    ]
-  };
-
-  useEffect(() => {
-    // Имитация загрузки данных
-    setTimeout(() => {
-      setCourse(mockCourse);
-      setLoading(false);
-    }, 1000);
-  }, [slug]);
+    { enabled: !!slug }
+  );
 
   const getDiscountPercentage = (original: number, current: number) => {
     return Math.round(((original - current) / original) * 100);
@@ -530,10 +437,10 @@ const CourseDetailPage: React.FC = () => {
   };
 
   const handlePreview = () => {
-    toast.info('Воспроизведение превью курса');
+    toast('Воспроизведение превью курса');
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Container>
         <div style={{ textAlign: 'center', padding: 'var(--spacing-xxl) 0' }}>
@@ -543,7 +450,7 @@ const CourseDetailPage: React.FC = () => {
     );
   }
 
-  if (!course) {
+  if (isError || !data) {
     return (
       <Container>
         <div style={{ textAlign: 'center', padding: 'var(--spacing-xxl) 0' }}>
@@ -552,6 +459,10 @@ const CourseDetailPage: React.FC = () => {
       </Container>
     );
   }
+
+  const course = data as any;
+  const mainInstructor = (course.instructors && course.instructors.length > 0) ? course.instructors[0] : null;
+  const lessonCount = Array.isArray(course.lessons) ? course.lessons.length : 0;
 
   return (
     <Container>
@@ -577,21 +488,25 @@ const CourseDetailPage: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <span>
-                <Star size={16} />
-                {course.rating}
-              </span>
+              {typeof course.rating !== 'undefined' && (
+                <span>
+                  <Star size={16} />
+                  {course.rating}
+                </span>
+              )}
               <span>
                 <Clock size={16} />
                 {course.duration}
               </span>
-              <span>
-                <Users size={16} />
-                {course.studentsCount} студентов
-              </span>
+              {typeof course.studentsCount !== 'undefined' && (
+                <span>
+                  <Users size={16} />
+                  {course.studentsCount} студентов
+                </span>
+              )}
               <span>
                 <BookOpen size={16} />
-                {course.lessonsCount} уроков
+                {lessonCount} уроков
               </span>
             </CourseMeta>
           </CourseInfo>
@@ -615,27 +530,31 @@ const CourseDetailPage: React.FC = () => {
           </ContentSection>
 
           <ContentSection>
-            <SectionTitle>Что вы получите</SectionTitle>
-            <FeaturesGrid>
-              {course.features.map((feature: any, index: number) => (
-                <FeatureCard
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  <h4>{feature.title}</h4>
-                  <p>{feature.description}</p>
-                </FeatureCard>
-              ))}
-            </FeaturesGrid>
+            {Array.isArray(course.outcomes) && course.outcomes.length > 0 && (
+              <>
+                <SectionTitle>Что вы получите</SectionTitle>
+                <FeaturesGrid>
+                  {course.outcomes.map((out: string, index: number) => (
+                    <FeatureCard
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: index * 0.05 }}
+                      viewport={{ once: true }}
+                    >
+                      <h4>{out}</h4>
+                      <p></p>
+                    </FeatureCard>
+                  ))}
+                </FeaturesGrid>
+              </>
+            )}
           </ContentSection>
 
           <ContentSection>
             <SectionTitle>Программа курса</SectionTitle>
             <LessonsSection>
-              {course.lessons.map((lesson: any, index: number) => (
+              {Array.isArray(course.lessons) && course.lessons.map((lesson: any, index: number) => (
                 <LessonItem key={lesson._id} $isCompleted={lesson.isCompleted}>
                   <LessonHeader>
                     <LessonTitle>
@@ -653,7 +572,7 @@ const CourseDetailPage: React.FC = () => {
                         </span>
                       )}
                     </LessonTitle>
-                    <LessonDuration>{lesson.duration}</LessonDuration>
+                    <LessonDuration>{typeof lesson.duration === 'number' ? `${lesson.duration} мин` : lesson.duration}</LessonDuration>
                   </LessonHeader>
                   <LessonDescription>{lesson.description}</LessonDescription>
                 </LessonItem>
@@ -664,7 +583,7 @@ const CourseDetailPage: React.FC = () => {
           <ContentSection>
             <SectionTitle>Требования</SectionTitle>
             <ul style={{ color: 'var(--color-text-light)', lineHeight: 1.7 }}>
-              {course.requirements.map((req: string, index: number) => (
+               {Array.isArray(course.requirements) && course.requirements.map((req: string, index: number) => (
                 <li key={index} style={{ marginBottom: '0.5rem' }}>{req}</li>
               ))}
             </ul>
@@ -673,7 +592,7 @@ const CourseDetailPage: React.FC = () => {
           <ContentSection>
             <SectionTitle>Результаты обучения</SectionTitle>
             <ul style={{ color: 'var(--color-text-light)', lineHeight: 1.7 }}>
-              {course.outcomes.map((outcome: string, index: number) => (
+              {Array.isArray(course.outcomes) && course.outcomes.map((outcome: string, index: number) => (
                 <li key={index} style={{ marginBottom: '0.5rem' }}>{outcome}</li>
               ))}
             </ul>
@@ -698,7 +617,7 @@ const CourseDetailPage: React.FC = () => {
 
             <CourseStats>
               <StatItem>
-                <div className="stat-number">{course.lessonsCount}</div>
+                <div className="stat-number">{lessonCount}</div>
                 <div className="stat-label">Уроков</div>
               </StatItem>
               <StatItem>
@@ -730,34 +649,17 @@ const CourseDetailPage: React.FC = () => {
             </div>
           </PurchaseCard>
 
-          <InstructorCard
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <InstructorAvatar $imageUrl={course.instructor.avatar} />
-            <InstructorName>{course.instructor.name}</InstructorName>
-            <InstructorBio>{course.instructor.bio}</InstructorBio>
-            <div style={{ marginBottom: 'var(--spacing-md)' }}>
-              <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
-                Опыт: {course.instructor.experience} лет
-              </span>
-              <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem', marginLeft: 'var(--spacing-md)' }}>
-                Рейтинг: {course.instructor.rating} ⭐
-              </span>
-            </div>
-            <SocialLinks>
-              <a href="#" title="Instagram">
-                <Instagram size={20} />
-              </a>
-              <a href="#" title="Facebook">
-                <Facebook size={20} />
-              </a>
-              <a href="#" title="Website">
-                <Globe size={20} />
-              </a>
-            </SocialLinks>
-          </InstructorCard>
+          {mainInstructor && (
+            <InstructorCard
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <InstructorAvatar $imageUrl={mainInstructor.avatar || ''} />
+              <InstructorName>{`${mainInstructor.firstName || ''} ${mainInstructor.lastName || ''}`.trim()}</InstructorName>
+              {mainInstructor.bio && <InstructorBio>{mainInstructor.bio}</InstructorBio>}
+            </InstructorCard>
+          )}
         </Sidebar>
       </MainContent>
     </Container>

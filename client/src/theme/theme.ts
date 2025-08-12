@@ -1,4 +1,4 @@
-import { theme as sharedTheme } from '../../shared/theme';
+import { theme as sharedTheme } from '../../../shared/theme';
 
 // Расширяем тему для клиентской части
 export const theme = {

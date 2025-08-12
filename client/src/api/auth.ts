@@ -1,5 +1,5 @@
 import { api } from './client';
-import { User, LoginRequest, RegisterRequest, AuthResponse } from '../../shared/types';
+import { User, LoginRequest, RegisterRequest, AuthResponse } from '../../../shared/types';
 
 export const authAPI = {
   // Login user

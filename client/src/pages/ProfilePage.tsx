@@ -548,7 +548,7 @@ const ProfilePage: React.FC = () => {
             <Avatar $imageUrl={mockUser.avatar}>
               {!mockUser.avatar && <User size={48} />}
             </Avatar>
-            <AvatarUpload onClick={() => toast.info('Загрузка фото')}>
+            <AvatarUpload onClick={() => toast('Загрузка фото')}>
               <Camera size={20} />
             </AvatarUpload>
           </AvatarSection>

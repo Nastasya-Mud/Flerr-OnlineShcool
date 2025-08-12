@@ -4,6 +4,7 @@ import { body } from 'express-validator';
 import { validateRequest } from '../middleware/validateRequest';
 import { auth } from '../middleware/auth';
 import { User, IUser } from '../models/User';
+import { sendPasswordResetEmail } from '../utils/mailer';
 import { AuthRequest } from '../middleware/auth';
 
 const router = express.Router();
@@ -314,14 +315,11 @@ router.post('/forgot-password', [
       { expiresIn: '1h' }
     );
 
-    // TODO: Send email with reset link
-    // For now, just return the token (in production, send via email)
+    await sendPasswordResetEmail(email, resetToken);
+
     res.json({
       success: true,
       message: 'Password reset email sent',
-      data: {
-        resetToken, // Remove this in production
-      },
     });
   } catch (error) {
     console.error('Forgot password error:', error);

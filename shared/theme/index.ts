@@ -4,8 +4,12 @@ export const theme: Theme = {
   colors: {
     // Основные цвета
     primary: '#800080', // Purple
+    purple: '#800080',
     secondary: '#B4A5A5', // Charlotte
+    charlotte: '#B4A5A5',
     accent: '#E6E6FA', // Lilac
+    lavender: '#E6E6FA',
+    lightLavender: '#F0E6FF',
     
     // Фоновые цвета
     background: '#F8F7FF', // Светлый Lilac

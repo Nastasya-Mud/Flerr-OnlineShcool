@@ -89,7 +89,7 @@ reviewSchema.virtual('totalVotes').get(function() {
 
 // Виртуальное поле для процента полезности
 reviewSchema.virtual('helpfulPercentage').get(function() {
-  const total = this.totalVotes;
+  const total = (this as any).totalVotes;
   if (total === 0) return 0;
   return Math.round((this.helpful / total) * 100);
 });

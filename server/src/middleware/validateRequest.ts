@@ -9,9 +9,9 @@ export const validateRequest = (req: Request, res: Response, next: NextFunction)
       success: false,
       error: 'Validation failed',
       details: errors.array().map(error => ({
-        field: error.param,
+        field: (error as any).param || 'unknown',
         message: error.msg,
-        value: error.value,
+        value: (error as any).value,
       })),
     });
   }

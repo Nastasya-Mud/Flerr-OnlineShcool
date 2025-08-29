@@ -315,8 +315,8 @@ router.post('/:id/helpful', [
       data: {
         helpful: review.helpful,
         notHelpful: review.notHelpful,
-        totalVotes: review.totalVotes,
-        helpfulPercentage: review.helpfulPercentage,
+        totalVotes: (review as any).totalVotes,
+        helpfulPercentage: (review as any).helpfulPercentage,
       },
       message: 'Vote recorded successfully',
     });

@@ -3,21 +3,12 @@ import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff } from 'lucide-react';
 
-interface InputProps {
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
-  placeholder?: string;
-  value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
-  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'onAnimationStart' | 'onAnimationEnd'> {
   label?: string;
   error?: string;
-  disabled?: boolean;
-  required?: boolean;
   fullWidth?: boolean;
   size?: 'small' | 'medium' | 'large';
   icon?: React.ReactNode;
-  className?: string;
 }
 
 const InputContainer = styled.div<{ fullWidth?: boolean }>`
@@ -137,7 +128,18 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       size = 'medium',
       icon,
       className,
-      ...props
+      id,
+      name,
+      autoComplete,
+      autoFocus,
+      readOnly,
+      min,
+      max,
+      step,
+      pattern,
+      maxLength,
+      minLength,
+      ...restProps
     },
     ref
   ) => {
@@ -180,9 +182,19 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             onBlur={handleBlur}
             disabled={disabled}
             required={required}
+            id={id}
+            name={name}
+            autoComplete={autoComplete}
+            autoFocus={autoFocus}
+            readOnly={readOnly}
+            min={min}
+            max={max}
+            step={step}
+            pattern={pattern}
+            maxLength={maxLength}
+            minLength={minLength}
             size={size}
             hasIcon={!!icon}
-            {...props}
           />
           {type === 'password' && (
             <PasswordToggle

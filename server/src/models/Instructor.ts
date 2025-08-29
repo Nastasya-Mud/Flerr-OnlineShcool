@@ -108,17 +108,17 @@ const instructorSchema = new Schema<IInstructor>({
 
 // Виртуальное поле для полного имени
 instructorSchema.virtual('fullName').get(function() {
-  return this.populated('user') ? `${this.user.firstName} ${this.user.lastName}` : '';
+  return this.populated('user') ? `${(this.user as any).firstName} ${(this.user as any).lastName}` : '';
 });
 
 // Виртуальное поле для email
 instructorSchema.virtual('email').get(function() {
-  return this.populated('user') ? this.user.email : '';
+  return this.populated('user') ? (this.user as any).email : '';
 });
 
 // Виртуальное поле для аватара
 instructorSchema.virtual('avatar').get(function() {
-  return this.populated('user') ? this.user.avatar : '';
+  return this.populated('user') ? (this.user as any).avatar : '';
 });
 
 // Индексы

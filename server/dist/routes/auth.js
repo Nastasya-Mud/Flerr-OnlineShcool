@@ -9,6 +9,7 @@ const express_validator_1 = require("express-validator");
 const validateRequest_1 = require("../middleware/validateRequest");
 const auth_1 = require("../middleware/auth");
 const User_1 = require("../models/User");
+const mailer_1 = require("../utils/mailer");
 const router = express_1.default.Router();
 // Генерация JWT токена
 const generateToken = (id) => {
@@ -290,14 +291,10 @@ router.post('/forgot-password', [
         }
         // Generate reset token (valid for 1 hour)
         const resetToken = jsonwebtoken_1.default.sign({ id: user._id, type: 'password-reset' }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        // TODO: Send email with reset link
-        // For now, just return the token (in production, send via email)
+        await (0, mailer_1.sendPasswordResetEmail)(email, resetToken);
         res.json({
             success: true,
             message: 'Password reset email sent',
-            data: {
-                resetToken, // Remove this in production
-            },
         });
     }
     catch (error) {

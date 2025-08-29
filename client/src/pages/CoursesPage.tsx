@@ -433,20 +433,20 @@ const CoursesPage: React.FC = () => {
                   
                   <CourseMeta>
                     {typeof (course as any).rating !== 'undefined' && (
-                      <span>
-                        <Star size={16} />
+                    <span>
+                      <Star size={16} />
                         {(course as any).rating}
-                      </span>
+                    </span>
                     )}
                     <span>
                       <Clock size={16} />
                       {course.duration}
                     </span>
                     {typeof (course as any).studentsCount !== 'undefined' && (
-                      <span>
-                        <Users size={16} />
+                    <span>
+                      <Users size={16} />
                         {(course as any).studentsCount} студентов
-                      </span>
+                    </span>
                     )}
                     <span>
                       <BookOpen size={16} />

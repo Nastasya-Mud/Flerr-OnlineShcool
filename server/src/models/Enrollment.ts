@@ -19,6 +19,10 @@ export interface IEnrollment extends Document {
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
+  
+  // Методы
+  updateProgress(completedLessonsCount: number, totalLessons: number): Promise<this>;
+  completeLesson(lessonId: mongoose.Types.ObjectId): Promise<this>;
 }
 
 const enrollmentSchema = new Schema<IEnrollment>({
@@ -92,7 +96,7 @@ enrollmentSchema.virtual('studyTime').get(function() {
 
 // Виртуальное поле для оставшихся уроков
 enrollmentSchema.virtual('remainingLessons').get(function() {
-  return this.populated('course') ? this.course.lessons.length - this.currentLesson : 0;
+  return this.populated('course') ? (this.course as any).lessons.length - this.currentLesson : 0;
 });
 
 // Метод для обновления прогресса

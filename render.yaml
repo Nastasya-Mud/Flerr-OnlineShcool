@@ -1,0 +1,36 @@
+services:
+  # Backend API
+  - type: web
+    name: flerr-server
+    env: node
+    buildCommand: cd server && npm install && npm run build
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        fromDatabase:
+          name: flerr-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_URL
+        value: https://flerr-client.onrender.com
+
+  # Frontend (Static Site)
+  - type: web
+    name: flerr-client
+    env: static
+    buildCommand: cd client && npm install && npm run build
+    staticPublishPath: ./client/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+databases:
+  - name: flerr-db
+    databaseName: flerr_school
+    user: flerr_user

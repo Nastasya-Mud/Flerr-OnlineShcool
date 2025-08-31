@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { Request } from 'express';
 import { body, param, query } from 'express-validator';
 import { validateRequest } from '../middleware/validateRequest';
-import { auth, requireRole, AuthRequest } from '../middleware/auth';
+import { auth, requireRole } from '../middleware/auth';
 import { User, IUser } from '../models/User';
 
 const router = express.Router();
@@ -19,7 +19,7 @@ router.get('/', [
   query('isActive').optional().isBoolean(),
   query('sort').optional().isIn(['createdAt', 'email', 'firstName', 'lastName']),
   query('order').optional().isIn(['asc', 'desc']),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -82,7 +82,7 @@ router.get('/', [
 router.get('/:id', [
   auth,
   param('id').isMongoId(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
     
@@ -125,7 +125,7 @@ router.put('/:id', [
   body('avatar').optional().isURL(),
   body('isActive').optional().isBoolean(),
   body('role').optional().isIn(['student', 'admin', 'instructor']),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const user = await User.findById(req.params.id);
     
@@ -176,7 +176,7 @@ router.delete('/:id', [
   auth,
   requireRole(['admin']),
   param('id').isMongoId(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const user = await User.findById(req.params.id);
     
@@ -209,7 +209,7 @@ router.delete('/:id', [
 router.get('/stats/overview', [
   auth,
   requireRole(['admin']),
-], async (req: AuthRequest, res) => {
+], async (req: Request, res) => {
   try {
     const totalUsers = await User.countDocuments();
     const activeUsers = await User.countDocuments({ isActive: true });

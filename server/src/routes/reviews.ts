@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { Request } from 'express';
 import { body, param, query } from 'express-validator';
 import { validateRequest } from '../middleware/validateRequest';
-import { auth, requireRole, AuthRequest } from '../middleware/auth';
+import { auth, requireRole } from '../middleware/auth';
 import { Review, IReview } from '../models/Review';
 import { Course } from '../models/Course';
 import { Instructor } from '../models/Instructor';
@@ -124,7 +124,7 @@ router.post('/', [
   body('pros.*').isString().trim().isLength({ min: 3, max: 100 }),
   body('cons').optional().isArray(),
   body('cons.*').isString().trim().isLength({ min: 3, max: 100 }),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const { courseId, instructorId, ...reviewData } = req.body;
     
@@ -201,7 +201,7 @@ router.put('/:id', [
   body('pros.*').isString().trim().isLength({ min: 3, max: 100 }),
   body('cons').optional().isArray(),
   body('cons.*').isString().trim().isLength({ min: 3, max: 100 }),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const review = await Review.findById(req.params.id);
     
@@ -247,7 +247,7 @@ router.put('/:id', [
 router.delete('/:id', [
   auth,
   param('id').isMongoId(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const review = await Review.findById(req.params.id);
     
@@ -289,7 +289,7 @@ router.post('/:id/helpful', [
   auth,
   param('id').isMongoId(),
   body('helpful').isBoolean(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const review = await Review.findById(req.params.id);
     
@@ -334,7 +334,7 @@ router.post('/:id/helpful', [
 router.get('/stats/overview', [
   auth,
   requireRole(['admin']),
-], async (req: AuthRequest, res) => {
+], async (req: Request, res) => {
   try {
     const totalReviews = await Review.countDocuments();
     const verifiedReviews = await Review.countDocuments({ isVerified: true });

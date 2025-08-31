@@ -1,11 +1,11 @@
-import express from 'express';
+import express, { Request } from 'express';
 import jwt from 'jsonwebtoken';
 import { body } from 'express-validator';
 import { validateRequest } from '../middleware/validateRequest';
 import { auth } from '../middleware/auth';
 import { User, IUser } from '../models/User';
 import { sendPasswordResetEmail } from '../utils/mailer';
-import { AuthRequest } from '../middleware/auth';
+
 
 const router = express.Router();
 
@@ -158,7 +158,7 @@ router.post('/login', [
 // @route   GET /api/auth/me
 // @desc    Get current user
 // @access  Private
-router.get('/me', auth, async (req: AuthRequest, res) => {
+router.get('/me', auth, async (req: Request, res) => {
   try {
     const user = await User.findById(req.user!._id).select('-password');
     
@@ -199,7 +199,7 @@ router.put('/profile', [
     .isURL()
     .withMessage('Please enter a valid URL for avatar'),
   validateRequest,
-], async (req: AuthRequest, res) => {
+], async (req: Request, res) => {
   try {
     const { firstName, lastName, phone, avatar } = req.body;
 
@@ -249,7 +249,7 @@ router.put('/change-password', [
     .isLength({ min: 6 })
     .withMessage('New password must be at least 6 characters long'),
   validateRequest,
-], async (req: AuthRequest, res) => {
+], async (req: Request, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
 

@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { Request } from 'express';
 import { body, param, query } from 'express-validator';
 import { validateRequest } from '../middleware/validateRequest';
-import { auth, requireRole, AuthRequest } from '../middleware/auth';
+import { auth, requireRole } from '../middleware/auth';
 import { Supplier, ISupplier } from '../models/Supplier';
 
 const router = express.Router();
@@ -168,7 +168,7 @@ router.post('/', [
   body('discount.validUntil').optional().isISO8601(),
   body('featured').optional().isBoolean(),
   body('isVerified').optional().isBoolean(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const supplier = new Supplier(req.body);
     await supplier.save();
@@ -245,7 +245,7 @@ router.put('/:id', [
   body('featured').optional().isBoolean(),
   body('isVerified').optional().isBoolean(),
   body('isActive').optional().isBoolean(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const supplier = await Supplier.findById(req.params.id);
     
@@ -282,7 +282,7 @@ router.delete('/:id', [
   auth,
   requireRole(['admin']),
   param('id').isMongoId(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const supplier = await Supplier.findById(req.params.id);
     

@@ -14,7 +14,7 @@ export interface AuthRequest extends Request {
   user?: IUser;
 }
 
-export const auth = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const auth = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
 
@@ -47,7 +47,7 @@ export const auth = async (req: AuthRequest, res: Response, next: NextFunction) 
 
 // Middleware для проверки роли
 export const requireRole = (roles: string[]) => {
-  return (req: AuthRequest, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({
         success: false,
@@ -68,7 +68,7 @@ export const requireRole = (roles: string[]) => {
 
 // Middleware для проверки владельца ресурса
 export const requireOwnership = (resourceModel: any, resourceIdParam: string = 'id') => {
-  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
         return res.status(401).json({

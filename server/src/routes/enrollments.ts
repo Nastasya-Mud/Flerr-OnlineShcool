@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { Request } from 'express';
 import { body, param, query } from 'express-validator';
 import { validateRequest } from '../middleware/validateRequest';
-import { auth, requireRole, AuthRequest } from '../middleware/auth';
+import { auth, requireRole } from '../middleware/auth';
 import { Enrollment, IEnrollment } from '../models/Enrollment';
 import { Course } from '../models/Course';
 import { Order } from '../models/Order';
@@ -18,7 +18,7 @@ router.get('/', [
   query('status').optional().isIn(['active', 'completed', 'paused', 'cancelled']),
   query('sort').optional().isIn(['createdAt', 'lastAccessDate', 'progress']),
   query('order').optional().isIn(['asc', 'desc']),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -70,7 +70,7 @@ router.get('/', [
 router.get('/:id', [
   auth,
   param('id').isMongoId(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const enrollment = await Enrollment.findById(req.params.id)
       .populate('course', 'title slug image duration lessons materials requirements outcomes')
@@ -111,7 +111,7 @@ router.post('/', [
   auth,
   body('courseId').isMongoId(),
   body('orderId').optional().isMongoId(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const { courseId, orderId } = req.body;
     
@@ -183,7 +183,7 @@ router.put('/:id/progress', [
   param('id').isMongoId(),
   body('completedLessonsCount').isInt({ min: 0 }),
   body('totalLessons').isInt({ min: 1 }),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const enrollment = await Enrollment.findById(req.params.id);
     
@@ -230,7 +230,7 @@ router.post('/:id/complete-lesson', [
   auth,
   param('id').isMongoId(),
   body('lessonId').isMongoId(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const enrollment = await Enrollment.findById(req.params.id);
     
@@ -277,7 +277,7 @@ router.put('/:id/status', [
   auth,
   param('id').isMongoId(),
   body('status').isIn(['active', 'completed', 'paused', 'cancelled']),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const enrollment = await Enrollment.findById(req.params.id);
     
@@ -328,7 +328,7 @@ router.put('/:id/status', [
 router.delete('/:id', [
   auth,
   param('id').isMongoId(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const enrollment = await Enrollment.findById(req.params.id);
     
@@ -368,7 +368,7 @@ router.delete('/:id', [
 router.get('/stats/overview', [
   auth,
   requireRole(['admin']),
-], async (req: AuthRequest, res) => {
+], async (req: Request, res) => {
   try {
     const totalEnrollments = await Enrollment.countDocuments();
     const activeEnrollments = await Enrollment.countDocuments({ status: 'active' });

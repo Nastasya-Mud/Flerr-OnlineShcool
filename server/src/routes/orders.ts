@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { Request } from 'express';
 import { body, param, query } from 'express-validator';
 import { validateRequest } from '../middleware/validateRequest';
-import { auth, requireRole, AuthRequest } from '../middleware/auth';
+import { auth, requireRole } from '../middleware/auth';
 import { Order, IOrder } from '../models/Order';
 import { Course } from '../models/Course';
 import { PromoCode } from '../models/PromoCode';
@@ -18,7 +18,7 @@ router.get('/', [
   query('status').optional().isIn(['pending', 'paid', 'cancelled', 'refunded']),
   query('sort').optional().isIn(['createdAt', 'total', 'status']),
   query('order').optional().isIn(['asc', 'desc']),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -70,7 +70,7 @@ router.get('/', [
 router.get('/:id', [
   auth,
   param('id').isMongoId(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const order = await Order.findById(req.params.id)
       .populate('items.course', 'title slug image price originalPrice')
@@ -119,7 +119,7 @@ router.post('/', [
   body('billingInfo.phone').optional().isString().trim(),
   body('billingInfo.address').optional().isString().trim(),
   body('notes').optional().isString().trim(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const { items, promoCode, ...orderData } = req.body;
     
@@ -224,7 +224,7 @@ router.put('/:id/status', [
   body('status').isIn(['pending', 'paid', 'cancelled', 'refunded']),
   body('paymentStatus').optional().isIn(['pending', 'completed', 'failed']),
   body('notes').optional().isString().trim(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     const order = await Order.findById(req.params.id);
     
@@ -266,7 +266,7 @@ router.put('/:id/status', [
 router.get('/stats/overview', [
   auth,
   requireRole(['admin']),
-], async (req: AuthRequest, res) => {
+], async (req: Request, res) => {
   try {
     const totalOrders = await Order.countDocuments();
     const pendingOrders = await Order.countDocuments({ status: 'pending' });

@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { Request } from 'express';
 import { body, param, query } from 'express-validator';
 import { validateRequest } from '../middleware/validateRequest';
-import { auth, requireRole, AuthRequest } from '../middleware/auth';
+import { auth, requireRole } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -208,7 +208,7 @@ router.post('/', [
   body('tags').optional().isArray(),
   body('tags.*').isString().trim(),
   body('isPublished').optional().isBoolean(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     // Здесь будет логика создания контента
     const contentData = {
@@ -249,7 +249,7 @@ router.put('/:id', [
   body('tags').optional().isArray(),
   body('tags.*').isString().trim(),
   body('isPublished').optional().isBoolean(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     // Здесь будет логика обновления контента
     res.json({
@@ -272,7 +272,7 @@ router.delete('/:id', [
   auth,
   requireRole(['admin']),
   param('id').isMongoId(),
-], validateRequest, async (req: AuthRequest, res) => {
+], validateRequest, async (req: Request, res) => {
   try {
     // Здесь будет логика удаления контента
     res.json({

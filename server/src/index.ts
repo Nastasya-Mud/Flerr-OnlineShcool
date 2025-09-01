@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
 import 'express-async-errors';
 import dotenv from 'dotenv';
 
@@ -78,8 +79,43 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
 
-// Error handling middleware
-app.use(notFound);
+// Serve static files from React build
+if (process.env.NODE_ENV === 'production') {
+  const clientBuildPath = path.join(__dirname, '../../client/dist');
+  app.use(express.static(clientBuildPath));
+  
+  // Handle React Router (SPA) - все остальные маршруты отдают index.html
+  app.get('*', (req, res) => {
+    // Исключаем API маршруты
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({ message: 'API route not found' });
+    }
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+} else {
+  // В development режиме показываем API информацию на корневом пути
+  app.get('/', (req, res) => {
+    res.json({
+      message: 'Flerr Online School API',
+      version: '1.0.0',
+      environment: 'development',
+      endpoints: {
+        health: '/api/health',
+        auth: '/api/auth',
+        courses: '/api/courses',
+        users: '/api/users',
+        instructors: '/api/instructors',
+        suppliers: '/api/suppliers',
+        orders: '/api/orders',
+        reviews: '/api/reviews',
+        enrollments: '/api/enrollments'
+      }
+    });
+  });
+}
+
+// Error handling middleware (только для API routes)
+app.use('/api/*', notFound);
 app.use(errorHandler);
 
 // Start server

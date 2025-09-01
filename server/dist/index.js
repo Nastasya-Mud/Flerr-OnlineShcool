@@ -9,6 +9,7 @@ const helmet_1 = __importDefault(require("helmet"));
 const compression_1 = __importDefault(require("compression"));
 const morgan_1 = __importDefault(require("morgan"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
+const path_1 = __importDefault(require("path"));
 require("express-async-errors");
 const dotenv_1 = __importDefault(require("dotenv"));
 const database_1 = require("./config/database");
@@ -72,8 +73,42 @@ app.use('/api/orders', orders_1.default);
 app.use('/api/reviews', reviews_1.default);
 app.use('/api/content', content_1.default);
 app.use('/api/enrollments', enrollments_1.default);
-// Error handling middleware
-app.use(notFound_1.notFound);
+// Serve static files from React build
+if (process.env.NODE_ENV === 'production') {
+    const clientBuildPath = path_1.default.join(__dirname, '../../client/dist');
+    app.use(express_1.default.static(clientBuildPath));
+    // Handle React Router (SPA) - все остальные маршруты отдают index.html
+    app.get('*', (req, res) => {
+        // Исключаем API маршруты
+        if (req.path.startsWith('/api/')) {
+            return res.status(404).json({ message: 'API route not found' });
+        }
+        res.sendFile(path_1.default.join(clientBuildPath, 'index.html'));
+    });
+}
+else {
+    // В development режиме показываем API информацию на корневом пути
+    app.get('/', (req, res) => {
+        res.json({
+            message: 'Flerr Online School API',
+            version: '1.0.0',
+            environment: 'development',
+            endpoints: {
+                health: '/api/health',
+                auth: '/api/auth',
+                courses: '/api/courses',
+                users: '/api/users',
+                instructors: '/api/instructors',
+                suppliers: '/api/suppliers',
+                orders: '/api/orders',
+                reviews: '/api/reviews',
+                enrollments: '/api/enrollments'
+            }
+        });
+    });
+}
+// Error handling middleware (только для API routes)
+app.use('/api/*', notFound_1.notFound);
 app.use(errorHandler_1.errorHandler);
 // Start server
 const startServer = async () => {

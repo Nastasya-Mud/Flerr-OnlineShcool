@@ -15,10 +15,12 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import ProfilePage from './pages/ProfilePage'
 import DashboardPage from './pages/DashboardPage'
+import AdminPanelPage from './pages/AdminPanelPage'
 
 // Components
 import Layout from './components/Layout/Layout'
 import ProtectedRoute from './components/Auth/ProtectedRoute'
+import AdminRoute from './components/Auth/AdminRoute'
 
 // Types
 import { User } from '../../shared/types'
@@ -50,6 +52,13 @@ const App: React.FC = () => {
             <ProtectedRoute>
               <DashboardPage />
             </ProtectedRoute>
+          } />
+          
+          {/* Admin Routes */}
+          <Route path="admin" element={
+            <AdminRoute>
+              <AdminPanelPage />
+            </AdminRoute>
           } />
         </Route>
       </Routes>

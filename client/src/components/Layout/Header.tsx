@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import styled from 'styled-components';
-import { Menu, X, User, LogOut, BookOpen, Users, Package, Info } from 'lucide-react';
+import { Menu, X, User, LogOut, BookOpen, Users, Package, Info, Settings } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const HeaderContainer = styled(motion.header)`
@@ -247,6 +247,14 @@ const Header: React.FC = () => {
                   Профиль
                 </Button>
               </Link>
+              {user?.role === 'admin' && (
+                <Link to="/admin">
+                  <Button $variant="secondary">
+                    <Settings size={16} />
+                    Админ панель
+                  </Button>
+                </Link>
+              )}
               <Button $variant="secondary" onClick={handleLogout}>
                 <LogOut size={16} />
                 Выйти
@@ -294,6 +302,12 @@ const Header: React.FC = () => {
                   <User size={16} />
                   Профиль
                 </MobileNavLink>
+                {user?.role === 'admin' && (
+                  <MobileNavLink to="/admin" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Settings size={16} />
+                    Админ панель
+                  </MobileNavLink>
+                )}
                 <Button $variant="secondary" onClick={handleLogout}>
                   <LogOut size={16} />
                   Выйти

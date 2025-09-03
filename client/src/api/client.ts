@@ -58,8 +58,13 @@ apiClient.interceptors.response.use(
           }
           break;
         case 400:
-          // Bad Request
-          toast.error(data.error || 'Invalid request');
+          // Bad Request - could also include validation details
+          if (data.details) {
+            const errorMessages = data.details.map((detail: any) => detail.message).join(', ');
+            toast.error(errorMessages);
+          } else {
+            toast.error(data.error || 'Invalid request');
+          }
           break;
         case 500:
           toast.error('Server error. Please try again later.');

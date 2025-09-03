@@ -36,8 +36,8 @@ router.post('/register', [
     .isLength({ min: 2, max: 50 })
     .withMessage('Last name must be between 2 and 50 characters'),
   body('phone')
-    .optional()
-    .isMobilePhone('any')
+    .optional({ nullable: true, checkFalsy: true })
+    .isString()
     .withMessage('Please enter a valid phone number'),
   validateRequest,
 ], async (req, res) => {

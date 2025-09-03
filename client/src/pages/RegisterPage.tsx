@@ -352,7 +352,9 @@ const RegisterPage: React.FC = () => {
     setIsLoading(true);
     
     try {
-      await register(formData);
+      // Исключаем confirmPassword из данных для отправки
+      const { confirmPassword, ...registrationData } = formData;
+      await register(registrationData);
       toast.success('Регистрация успешна! Добро пожаловать!');
       navigate('/');
     } catch (error: any) {

@@ -242,6 +242,7 @@ const AdminPanelPage: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalCourses: 0,
@@ -253,27 +254,55 @@ const AdminPanelPage: React.FC = () => {
     const loadData = async () => {
       try {
         setLoading(true);
+        console.log('Loading admin panel data...');
         
-        // Загружаем пользователей и курсы параллельно
+        // Загружаем пользователей и курсы параллельно с более надежной обработкой ошибок
         const [usersResponse, coursesResponse] = await Promise.all([
-          usersAPI.getAll().catch(() => ({ data: [] })),
-          coursesAPI.getAll().catch(() => ({ data: [] }))
+          usersAPI.getAll().catch((error) => {
+            console.error('Users API error:', error);
+            return { data: [] };
+          }),
+          coursesAPI.getAll().catch((error) => {
+            console.error('Courses API error:', error);
+            return { data: [] };
+          })
         ]);
         
-        setUsers(usersResponse.data);
-        setCourses(coursesResponse.data);
+        console.log('Users response:', usersResponse);
+        console.log('Courses response:', coursesResponse);
+        
+        // Защита от undefined/null данных
+        const usersData = Array.isArray(usersResponse?.data) ? usersResponse.data : [];
+        const coursesData = Array.isArray(coursesResponse?.data) ? coursesResponse.data : [];
+        
+        setUsers(usersData);
+        setCourses(coursesData);
         
         // Обновляем статистику
         setStats({
-          totalUsers: usersResponse.data.length,
-          totalCourses: coursesResponse.data.length,
-          totalInstructors: usersResponse.data.filter((u: any) => u.role === 'instructor').length,
+          totalUsers: usersData.length,
+          totalCourses: coursesData.length,
+          totalInstructors: usersData.filter((u: any) => u?.role === 'instructor').length,
           totalSuppliers: 0 // TODO: добавить после реализации API поставщиков
         });
         
+        console.log('Admin data loaded successfully');
+        
       } catch (error) {
         console.error('Error loading admin data:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
+        setError(errorMessage);
         toast.error('Ошибка загрузки данных');
+        
+        // Устанавливаем пустые массивы в случае ошибки
+        setUsers([]);
+        setCourses([]);
+        setStats({
+          totalUsers: 0,
+          totalCourses: 0,
+          totalInstructors: 0,
+          totalSuppliers: 0
+        });
       } finally {
         setLoading(false);
       }
@@ -369,30 +398,30 @@ const AdminPanelPage: React.FC = () => {
                   </TableRow>
                 ) : (
                   users.map((user: any) => (
-                    <TableRow key={user._id}>
-                      <TableCell>{user.firstName} {user.lastName}</TableCell>
-                      <TableCell>{user.email}</TableCell>
+                    <TableRow key={user?._id || Math.random()}>
+                      <TableCell>{(user?.firstName || '') + ' ' + (user?.lastName || '')}</TableCell>
+                      <TableCell>{user?.email || 'Не указан'}</TableCell>
                       <TableCell>
                         <span style={{ 
                           padding: '4px 8px', 
                           borderRadius: '4px', 
-                          background: user.role === 'admin' ? '#e3f2fd' : user.role === 'instructor' ? '#f3e5f5' : '#e8f5e8',
-                          color: user.role === 'admin' ? '#1565c0' : user.role === 'instructor' ? '#7b1fa2' : '#2e7d32'
+                          background: user?.role === 'admin' ? '#e3f2fd' : user?.role === 'instructor' ? '#f3e5f5' : '#e8f5e8',
+                          color: user?.role === 'admin' ? '#1565c0' : user?.role === 'instructor' ? '#7b1fa2' : '#2e7d32'
                         }}>
-                          {user.role === 'admin' ? 'Админ' : user.role === 'instructor' ? 'Преподаватель' : 'Студент'}
+                          {user?.role === 'admin' ? 'Админ' : user?.role === 'instructor' ? 'Преподаватель' : 'Студент'}
                         </span>
                       </TableCell>
                       <TableCell>
                         <span style={{ 
                           padding: '4px 8px', 
                           borderRadius: '4px', 
-                          background: user.isActive ? '#e8f5e8' : '#ffebee',
-                          color: user.isActive ? '#2e7d32' : '#c62828'
+                          background: user?.isActive !== false ? '#e8f5e8' : '#ffebee',
+                          color: user?.isActive !== false ? '#2e7d32' : '#c62828'
                         }}>
-                          {user.isActive ? 'Активен' : 'Неактивен'}
+                          {user?.isActive !== false ? 'Активен' : 'Неактивен'}
                         </span>
                       </TableCell>
-                      <TableCell>{new Date(user.createdAt).toLocaleDateString('ru-RU')}</TableCell>
+                      <TableCell>{user?.createdAt ? new Date(user.createdAt).toLocaleDateString('ru-RU') : 'Не указана'}</TableCell>
                     </TableRow>
                   ))
                 )}
@@ -450,19 +479,19 @@ const AdminPanelPage: React.FC = () => {
                   </TableRow>
                 ) : (
                   courses.map((course: any) => (
-                    <TableRow key={course._id}>
-                      <TableCell>{course.title}</TableCell>
-                      <TableCell>{course.category}</TableCell>
-                      <TableCell>{course.price} ₽</TableCell>
-                      <TableCell>0</TableCell>
+                    <TableRow key={course?._id || Math.random()}>
+                      <TableCell>{course?.title || 'Название не указано'}</TableCell>
+                      <TableCell>{course?.category || 'Без категории'}</TableCell>
+                      <TableCell>{course?.price ? `${course.price} ₽` : 'Бесплатно'}</TableCell>
+                      <TableCell>{course?.enrolledCount || 0}</TableCell>
                       <TableCell>
                         <span style={{ 
                           padding: '4px 8px', 
                           borderRadius: '4px', 
-                          background: course.isActive ? '#e8f5e8' : '#ffebee',
-                          color: course.isActive ? '#2e7d32' : '#c62828'
+                          background: course?.isActive !== false ? '#e8f5e8' : '#ffebee',
+                          color: course?.isActive !== false ? '#2e7d32' : '#c62828'
                         }}>
-                          {course.isActive ? 'Активен' : 'Неактивен'}
+                          {course?.isActive !== false ? 'Активен' : 'Неактивен'}
                         </span>
                       </TableCell>
                     </TableRow>

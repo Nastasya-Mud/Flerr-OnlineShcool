@@ -351,6 +351,17 @@ const LoginPage: React.FC = () => {
           <p style={{ marginTop: '0.5rem' }}>
             <Link to="/forgot-password">Забыли пароль?</Link>
           </p>
+          <p style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
+            <span 
+              onClick={() => {
+                localStorage.clear();
+                window.location.reload();
+              }}
+              style={{ color: '#666', cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              Проблемы с входом? Очистить кэш
+            </span>
+          </p>
         </Footer>
       </LoginCard>
     </Container>

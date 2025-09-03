@@ -28,7 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const initialState: AuthState = {
   user: null,
   token: localStorage.getItem('token'),
-  isLoading: false,
+  isLoading: true, // Начинаем с загрузки, чтобы проверить токен
   isAuthenticated: false,
 };
 
@@ -84,14 +84,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           dispatch({ type: 'AUTH_START' });
           const response = await authAPI.getMe();
+          console.log('Auth check response:', response);
           dispatch({
             type: 'AUTH_SUCCESS',
             payload: { user: response.data, token },
           });
         } catch (error) {
+          console.error('Auth check failed:', error);
           localStorage.removeItem('token');
           dispatch({ type: 'AUTH_FAILURE' });
         }
+      } else {
+        // Если нет токена, сразу завершаем загрузку
+        dispatch({ type: 'AUTH_FAILURE' });
       }
     };
 
@@ -102,6 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       dispatch({ type: 'AUTH_START' });
       const response = await authAPI.login({ email, password });
+      console.log('Login response:', response);
       const { user, token } = response.data;
       
       localStorage.setItem('token', token);
@@ -110,6 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         payload: { user, token },
       });
     } catch (error) {
+      console.error('Login failed:', error);
       dispatch({ type: 'AUTH_FAILURE' });
       throw error;
     }

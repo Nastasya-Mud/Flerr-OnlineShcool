@@ -5,6 +5,7 @@ import { validateRequest } from '../middleware/validateRequest';
 import { auth } from '../middleware/auth';
 import { User, IUser } from '../models/User';
 import { sendPasswordResetEmail } from '../utils/mailer';
+// import passport from '../config/passport';
 
 
 const router = express.Router();
@@ -164,7 +165,7 @@ router.post('/login', [
 // @access  Private
 router.get('/me', auth, async (req: Request, res) => {
   try {
-    const user = await User.findById(req.user!._id).select('-password');
+    const user = await User.findById((req.user as any)!._id).select('-password');
     
     res.json({
       success: true,
@@ -207,7 +208,7 @@ router.put('/profile', [
   try {
     const { firstName, lastName, phone, avatar } = req.body;
 
-    const user = await User.findById(req.user!._id);
+    const user = await User.findById((req.user as any)!._id);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -257,7 +258,7 @@ router.put('/change-password', [
   try {
     const { currentPassword, newPassword } = req.body;
 
-    const user = await User.findById(req.user!._id).select('+password');
+    const user = await User.findById((req.user as any)!._id).select('+password');
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -383,5 +384,8 @@ router.post('/reset-password', [
     });
   }
 });
+
+// Google OAuth routes temporarily disabled
+// Will be enabled after setting up Google Console project
 
 export default router; 

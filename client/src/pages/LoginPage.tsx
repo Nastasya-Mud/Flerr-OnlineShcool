@@ -336,7 +336,10 @@ const LoginPage: React.FC = () => {
           <span>или</span>
         </Divider>
 
-        <SocialButton type="button" onClick={() => toast('Функция в разработке')}>
+        <SocialButton 
+          type="button" 
+          onClick={() => toast('Google OAuth скоро будет доступен! Пока используйте обычный вход.')}
+        >
           Войти через Google
         </SocialButton>
 

@@ -10,6 +10,7 @@ const validateRequest_1 = require("../middleware/validateRequest");
 const auth_1 = require("../middleware/auth");
 const User_1 = require("../models/User");
 const mailer_1 = require("../utils/mailer");
+// import passport from '../config/passport';
 const router = express_1.default.Router();
 // Генерация JWT токена
 const generateToken = (id) => {
@@ -353,5 +354,7 @@ router.post('/reset-password', [
         });
     }
 });
+// Google OAuth routes temporarily disabled
+// Will be enabled after setting up Google Console project
 exports.default = router;
 //# sourceMappingURL=auth.js.map

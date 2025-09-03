@@ -16,6 +16,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage'
 import ProfilePage from './pages/ProfilePage'
 import DashboardPage from './pages/DashboardPage'
 import AdminPanelPage from './pages/AdminPanelPage'
+import AuthCallbackPage from './pages/AuthCallbackPage'
 
 // Components
 import Layout from './components/Layout/Layout'
@@ -41,6 +42,7 @@ const App: React.FC = () => {
           <Route path="register" element={<RegisterPage />} />
           <Route path="forgot-password" element={<ForgotPasswordPage />} />
           <Route path="reset-password" element={<ResetPasswordPage />} />
+          <Route path="auth/callback" element={<AuthCallbackPage />} />
           
           {/* Protected Routes */}
           <Route path="profile" element={

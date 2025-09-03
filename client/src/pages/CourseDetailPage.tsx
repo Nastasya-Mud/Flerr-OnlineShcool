@@ -418,7 +418,7 @@ const CourseDetailPage: React.FC = () => {
     ['course', slug],
     async () => {
       const res = await coursesAPI.getBySlug(slug!);
-      return res.data.data as Course;
+      return res.data as Course;
     },
     { enabled: !!slug }
   );

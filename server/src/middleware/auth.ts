@@ -2,18 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { User, IUser } from '../models/User';
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: IUser;
-    }
-  }
-}
-
-export interface AuthRequest extends Request {
-  user?: IUser;
-}
-
 export const auth = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -55,7 +43,7 @@ export const requireRole = (roles: string[]) => {
       });
     }
 
-    if (!roles.includes(req.user.role)) {
+    if (!roles.includes((req.user as any).role)) {
       return res.status(403).json({
         success: false,
         error: 'Access denied. Insufficient permissions.',
@@ -88,7 +76,7 @@ export const requireOwnership = (resourceModel: any, resourceIdParam: string = '
       }
 
       // Проверяем, является ли пользователь владельцем или админом
-      if (resource.userId?.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      if (resource.userId?.toString() !== (req.user as any)._id.toString() && (req.user as any).role !== 'admin') {
         return res.status(403).json({
           success: false,
           error: 'Access denied. You can only modify your own resources.',

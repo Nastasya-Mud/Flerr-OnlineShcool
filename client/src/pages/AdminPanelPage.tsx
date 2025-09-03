@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import { 
   Users, 
   BookOpen, 
@@ -12,6 +13,8 @@ import {
   Search,
   Filter
 } from 'lucide-react';
+import { coursesAPI } from '../api/courses';
+import { usersAPI } from '../api/users';
 
 const Container = styled(motion.div)`
   min-height: 100vh;
@@ -236,6 +239,48 @@ const EmptyState = styled.div`
 
 const AdminPanelPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('users');
+  const [users, setUsers] = useState<any[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalCourses: 0,
+    totalInstructors: 0,
+    totalSuppliers: 0
+  });
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        
+        // Загружаем пользователей и курсы параллельно
+        const [usersResponse, coursesResponse] = await Promise.all([
+          usersAPI.getAll().catch(() => ({ data: [] })),
+          coursesAPI.getAll().catch(() => ({ data: [] }))
+        ]);
+        
+        setUsers(usersResponse.data);
+        setCourses(coursesResponse.data);
+        
+        // Обновляем статистику
+        setStats({
+          totalUsers: usersResponse.data.length,
+          totalCourses: coursesResponse.data.length,
+          totalInstructors: usersResponse.data.filter((u: any) => u.role === 'instructor').length,
+          totalSuppliers: 0 // TODO: добавить после реализации API поставщиков
+        });
+        
+      } catch (error) {
+        console.error('Error loading admin data:', error);
+        toast.error('Ошибка загрузки данных');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
+  }, []);
 
   const tabs = [
     { id: 'users', label: 'Пользователи', icon: Users },
@@ -246,28 +291,28 @@ const AdminPanelPage: React.FC = () => {
     { id: 'settings', label: 'Настройки', icon: Settings },
   ];
 
-  const stats = [
+  const statsData = [
     { 
       icon: Users, 
-      number: '1,234', 
+      number: stats.totalUsers.toString(), 
       label: 'Всего пользователей', 
       color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
     },
     { 
       icon: BookOpen, 
-      number: '42', 
-      label: 'Активных курсов', 
+      number: stats.totalCourses.toString(), 
+      label: 'Всего курсов', 
       color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' 
     },
     { 
       icon: GraduationCap, 
-      number: '18', 
+      number: stats.totalInstructors.toString(), 
       label: 'Преподавателей', 
       color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' 
     },
     { 
       icon: Package, 
-      number: '156', 
+      number: stats.totalSuppliers.toString(), 
       label: 'Поставщиков', 
       color: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' 
     },
@@ -306,13 +351,51 @@ const AdminPanelPage: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <tbody>
-                <TableRow>
-                  <TableCell colSpan={5}>
-                    <EmptyState>
-                      <p>Пользователи будут отображаться здесь</p>
-                    </EmptyState>
-                  </TableCell>
-                </TableRow>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={5}>
+                      <EmptyState>
+                        <p>Загрузка...</p>
+                      </EmptyState>
+                    </TableCell>
+                  </TableRow>
+                ) : users.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5}>
+                      <EmptyState>
+                        <p>Пользователи не найдены</p>
+                      </EmptyState>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  users.map((user: any) => (
+                    <TableRow key={user._id}>
+                      <TableCell>{user.firstName} {user.lastName}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <span style={{ 
+                          padding: '4px 8px', 
+                          borderRadius: '4px', 
+                          background: user.role === 'admin' ? '#e3f2fd' : user.role === 'instructor' ? '#f3e5f5' : '#e8f5e8',
+                          color: user.role === 'admin' ? '#1565c0' : user.role === 'instructor' ? '#7b1fa2' : '#2e7d32'
+                        }}>
+                          {user.role === 'admin' ? 'Админ' : user.role === 'instructor' ? 'Преподаватель' : 'Студент'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span style={{ 
+                          padding: '4px 8px', 
+                          borderRadius: '4px', 
+                          background: user.isActive ? '#e8f5e8' : '#ffebee',
+                          color: user.isActive ? '#2e7d32' : '#c62828'
+                        }}>
+                          {user.isActive ? 'Активен' : 'Неактивен'}
+                        </span>
+                      </TableCell>
+                      <TableCell>{new Date(user.createdAt).toLocaleDateString('ru-RU')}</TableCell>
+                    </TableRow>
+                  ))
+                )}
               </tbody>
             </Table>
           </div>
@@ -349,13 +432,42 @@ const AdminPanelPage: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <tbody>
-                <TableRow>
-                  <TableCell colSpan={5}>
-                    <EmptyState>
-                      <p>Курсы будут отображаться здесь</p>
-                    </EmptyState>
-                  </TableCell>
-                </TableRow>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={5}>
+                      <EmptyState>
+                        <p>Загрузка...</p>
+                      </EmptyState>
+                    </TableCell>
+                  </TableRow>
+                ) : courses.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5}>
+                      <EmptyState>
+                        <p>Курсы не найдены. <button onClick={() => toast('Функция добавления курсов скоро будет доступна')}>Добавить первый курс</button></p>
+                      </EmptyState>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  courses.map((course: any) => (
+                    <TableRow key={course._id}>
+                      <TableCell>{course.title}</TableCell>
+                      <TableCell>{course.category}</TableCell>
+                      <TableCell>{course.price} ₽</TableCell>
+                      <TableCell>0</TableCell>
+                      <TableCell>
+                        <span style={{ 
+                          padding: '4px 8px', 
+                          borderRadius: '4px', 
+                          background: course.isActive ? '#e8f5e8' : '#ffebee',
+                          color: course.isActive ? '#2e7d32' : '#c62828'
+                        }}>
+                          {course.isActive ? 'Активен' : 'Неактивен'}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </tbody>
             </Table>
           </div>
@@ -388,7 +500,7 @@ const AdminPanelPage: React.FC = () => {
 
       <Dashboard>
         <StatsGrid>
-          {stats.map((stat, index) => (
+          {statsData.map((stat, index) => (
             <StatCard
               key={index}
               initial={{ opacity: 0, y: 20 }}

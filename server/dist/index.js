@@ -12,6 +12,7 @@ const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const path_1 = __importDefault(require("path"));
 require("express-async-errors");
 const dotenv_1 = __importDefault(require("dotenv"));
+// import passport from 'passport';
 const database_1 = require("./config/database");
 const errorHandler_1 = require("./middleware/errorHandler");
 const notFound_1 = require("./middleware/notFound");
@@ -45,6 +46,8 @@ app.use('/api/', limiter);
 // Body parsing middleware
 app.use(express_1.default.json({ limit: '10mb' }));
 app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
+// Initialize Passport (temporarily disabled)
+// app.use(passport.initialize());
 // Compression middleware
 app.use((0, compression_1.default)());
 // Logging middleware

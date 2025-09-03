@@ -456,20 +456,21 @@ const ProfilePage: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Имитация загрузки данных
-    setTimeout(() => {
+    // Загружаем реальные данные пользователя
+    if (user) {
       setFormData({
-        firstName: mockUser.firstName,
-        lastName: mockUser.lastName,
-        email: mockUser.email,
-        phone: mockUser.phone,
-        location: mockUser.location,
-        bio: mockUser.bio
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        location: '',
+        bio: ''
       });
-      setEnrolledCourses(mockEnrolledCourses);
+      // TODO: Загрузить курсы пользователя через API
+      setEnrolledCourses([]);
       setLoading(false);
-    }, 1000);
-  }, []);
+    }
+  }, [user]);
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -545,29 +546,29 @@ const ProfilePage: React.FC = () => {
       <ProfileHeader>
         <HeaderContent>
           <AvatarSection>
-            <Avatar $imageUrl={mockUser.avatar}>
-              {!mockUser.avatar && <User size={48} />}
+            <Avatar $imageUrl={user?.avatar}>
+              {!user?.avatar && <User size={48} />}
             </Avatar>
-            <AvatarUpload onClick={() => toast('Загрузка фото')}>
+            <AvatarUpload onClick={() => toast('Загрузка фото скоро будет доступна')}>
               <Camera size={20} />
             </AvatarUpload>
           </AvatarSection>
           
           <UserInfo>
-            <UserName>{mockUser.firstName} {mockUser.lastName}</UserName>
-            <UserEmail>{mockUser.email}</UserEmail>
+            <UserName>{user?.firstName} {user?.lastName}</UserName>
+            <UserEmail>{user?.email}</UserEmail>
             <UserStats>
               <div className="stat">
-                <div className="number">{mockUser.completedCourses}</div>
+                <div className="number">0</div>
                 <div className="label">Завершенных курсов</div>
               </div>
               <div className="stat">
-                <div className="number">{mockUser.totalCourses}</div>
+                <div className="number">0</div>
                 <div className="label">Всего курсов</div>
               </div>
               <div className="stat">
-                <div className="number">{mockUser.averageRating}</div>
-                <div className="label">Средний рейтинг</div>
+                <div className="number">{user?.role === 'admin' ? 'Админ' : 'Студент'}</div>
+                <div className="label">Роль</div>
               </div>
             </UserStats>
           </UserInfo>

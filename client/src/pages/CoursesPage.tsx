@@ -312,8 +312,8 @@ const CoursesPage: React.FC = () => {
     { keepPreviousData: true }
   );
 
-  const courses: Course[] = data?.data ?? [];
-  const pagination = data?.pagination;
+  const courses: Course[] = data ?? [];
+  const pagination = null; // TODO: implement pagination
 
   // Sync state -> URL
   React.useEffect(() => {
@@ -481,19 +481,7 @@ const CoursesPage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {pagination && (pagination.totalPages > 1) && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1rem' }}>
-          <Button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={!pagination.hasPrev}>
-            Назад
-          </Button>
-          <span style={{ alignSelf: 'center' }}>
-            Страница {pagination.page} из {pagination.totalPages}
-          </span>
-          <Button onClick={() => setPage((p) => p + 1)} disabled={!pagination.hasNext}>
-            Далее
-          </Button>
-        </div>
-      )}
+      {/* Pagination temporarily disabled */}
     </Container>
   );
 };

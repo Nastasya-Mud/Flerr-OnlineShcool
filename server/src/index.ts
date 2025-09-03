@@ -7,6 +7,7 @@ import rateLimit from 'express-rate-limit';
 import path from 'path';
 import 'express-async-errors';
 import dotenv from 'dotenv';
+// import passport from 'passport';
 
 import { connectDB } from './config/database';
 import { errorHandler } from './middleware/errorHandler';
@@ -47,6 +48,9 @@ app.use('/api/', limiter);
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Initialize Passport (temporarily disabled)
+// app.use(passport.initialize());
 
 // Compression middleware
 app.use(compression());

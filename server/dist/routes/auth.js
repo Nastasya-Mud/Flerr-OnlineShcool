@@ -52,6 +52,9 @@ router.post('/register', [
                 error: 'User already exists with this email',
             });
         }
+        // Check if this should be the first admin user
+        const existingUsers = await User_1.User.countDocuments();
+        const isFirstUser = existingUsers === 0;
         // Create user
         const user = new User_1.User({
             email,
@@ -59,7 +62,7 @@ router.post('/register', [
             firstName,
             lastName,
             phone,
-            role: 'student', // Default role
+            role: isFirstUser ? 'admin' : 'student', // First user becomes admin
         });
         await user.save();
         // Generate token

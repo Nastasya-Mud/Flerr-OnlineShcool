@@ -3,30 +3,44 @@ import { User, LoginRequest, RegisterRequest, AuthResponse } from '../../../shar
 
 export const authAPI = {
   // Login user
-  login: (data: LoginRequest): Promise<{ data: AuthResponse }> =>
-    api.post('/auth/login', data),
+  login: async (data: LoginRequest): Promise<{ data: AuthResponse }> => {
+    const response = await api.post('/auth/login', data);
+    return { data: response.data.data };
+  },
 
   // Register user
-  register: (data: RegisterRequest): Promise<{ data: AuthResponse }> =>
-    api.post('/auth/register', data),
+  register: async (data: RegisterRequest): Promise<{ data: AuthResponse }> => {
+    const response = await api.post('/auth/register', data);
+    return { data: response.data.data };
+  },
 
   // Get current user
-  getMe: (): Promise<{ data: User }> =>
-    api.get('/auth/me'),
+  getMe: async (): Promise<{ data: User }> => {
+    const response = await api.get('/auth/me');
+    return { data: response.data.data };
+  },
 
   // Update user profile
-  updateProfile: (data: Partial<User>): Promise<{ data: User }> =>
-    api.put('/auth/profile', data),
+  updateProfile: async (data: Partial<User>): Promise<{ data: User }> => {
+    const response = await api.put('/auth/profile', data);
+    return { data: response.data.data };
+  },
 
   // Change password
-  changePassword: (data: { currentPassword: string; newPassword: string }): Promise<{ data: { message: string } }> =>
-    api.put('/auth/change-password', data),
+  changePassword: async (data: { currentPassword: string; newPassword: string }): Promise<{ data: { message: string } }> => {
+    const response = await api.put('/auth/change-password', data);
+    return { data: { message: response.data.message } };
+  },
 
   // Forgot password
-  forgotPassword: (data: { email: string }): Promise<{ data: { message: string } }> =>
-    api.post('/auth/forgot-password', data),
+  forgotPassword: async (data: { email: string }): Promise<{ data: { message: string } }> => {
+    const response = await api.post('/auth/forgot-password', data);
+    return { data: { message: response.data.message } };
+  },
 
   // Reset password
-  resetPassword: (data: { token: string; newPassword: string }): Promise<{ data: { message: string } }> =>
-    api.post('/auth/reset-password', data),
+  resetPassword: async (data: { token: string; newPassword: string }): Promise<{ data: { message: string } }> => {
+    const response = await api.post('/auth/reset-password', data);
+    return { data: { message: response.data.message } };
+  },
 }; 

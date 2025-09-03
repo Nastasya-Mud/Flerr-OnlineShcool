@@ -57,6 +57,10 @@ apiClient.interceptors.response.use(
             toast.error(data.error || 'Validation failed');
           }
           break;
+        case 400:
+          // Bad Request
+          toast.error(data.error || 'Invalid request');
+          break;
         case 500:
           toast.error('Server error. Please try again later.');
           break;

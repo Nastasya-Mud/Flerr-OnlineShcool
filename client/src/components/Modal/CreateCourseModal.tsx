@@ -192,6 +192,7 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({ isOpen, onClose, 
     requirements: '',
     outcomes: ''
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -217,6 +218,17 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({ isOpen, onClose, 
     try {
       setLoading(true);
       
+      // Если выбран файл изображения — конвертируем в base64 data URL
+      let imageValue = formData.image.trim();
+      if (imageFile) {
+        imageValue = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(imageFile);
+        });
+      }
+
       const courseData = {
         title: formData.title.trim(),
         description: formData.description.trim(),
@@ -226,8 +238,8 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({ isOpen, onClose, 
         duration: formData.duration.trim() || '4 недели',
         level: formData.level,
         category: formData.category,
-        image: formData.image.trim() || 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800',
-        instructors: [], // Пока пустой массив
+        image: imageValue || 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800',
+        instructors: [],
         materials: formData.materials ? formData.materials.split('\n').map(m => m.trim()).filter(Boolean) : [],
         requirements: formData.requirements ? formData.requirements.split('\n').map(r => r.trim()).filter(Boolean) : ['Желание учиться'],
         outcomes: formData.outcomes ? formData.outcomes.split('\n').map(o => o.trim()).filter(Boolean) : []
@@ -254,6 +266,7 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({ isOpen, onClose, 
         requirements: '',
         outcomes: ''
       });
+      setImageFile(null);
       
     } catch (error: any) {
       console.error('Error creating course:', error);
@@ -376,16 +389,25 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({ isOpen, onClose, 
                     <option value="искусство">Искусство</option>
                   </Select>
                 </FormGroup>
-                <FormGroup>
-                  <Label>Изображение (URL)</Label>
-                  <Input
-                    type="url"
-                    name="image"
-                    value={formData.image}
-                    onChange={handleChange}
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </FormGroup>
+          <FormGroup>
+            <Label>Изображение курса</Label>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                setImageFile(file);
+              }}
+            />
+            <small style={{ color: '#718096' }}>Можно загрузить файл или оставить пустым и указать URL ниже</small>
+            <Input
+              type="url"
+              name="image"
+              value={formData.image}
+              onChange={handleChange}
+              placeholder="https://example.com/image.jpg"
+            />
+          </FormGroup>
               </Row>
 
               <FormGroup>

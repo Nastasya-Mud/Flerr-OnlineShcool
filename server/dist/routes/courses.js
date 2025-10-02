@@ -111,13 +111,16 @@ router.post('/', [
     (0, express_validator_1.body)('description').isString().trim().notEmpty().withMessage('Description is required'),
     (0, express_validator_1.body)('shortDescription').isString().trim().notEmpty().withMessage('Short description is required'),
     (0, express_validator_1.body)('price').isFloat({ min: 0 }).withMessage('Valid price is required'),
-    (0, express_validator_1.body)('originalPrice').isFloat({ min: 0 }).withMessage('Valid original price is required'),
+    // originalPrice может отсутствовать
+    (0, express_validator_1.body)('originalPrice').optional({ nullable: true }).isFloat({ min: 0 }).withMessage('Valid original price is required'),
     (0, express_validator_1.body)('duration').isString().trim().notEmpty().withMessage('Duration is required'),
     (0, express_validator_1.body)('level').isIn(['beginner', 'intermediate', 'advanced']).withMessage('Valid level is required'),
     (0, express_validator_1.body)('category').isString().trim().notEmpty().withMessage('Category is required'),
-    (0, express_validator_1.body)('image').isString().trim().notEmpty().withMessage('Image URL is required'),
-    (0, express_validator_1.body)('instructors').isArray({ min: 1 }).withMessage('At least one instructor is required'),
-    (0, express_validator_1.body)('instructors.*').isMongoId().withMessage('Valid instructor IDs are required'),
+    // image: пока как строка (URL либо data URL). Позже можно заменить на upload
+    (0, express_validator_1.body)('image').isString().trim().notEmpty().withMessage('Image is required'),
+    // instructors делаем необязательным
+    (0, express_validator_1.body)('instructors').optional({ nullable: true }).isArray().withMessage('Instructors must be an array'),
+    (0, express_validator_1.body)('instructors.*').optional().isMongoId().withMessage('Valid instructor IDs are required'),
     (0, express_validator_1.body)('materials').optional().isArray(),
     (0, express_validator_1.body)('requirements').optional().isArray(),
     (0, express_validator_1.body)('outcomes').optional().isArray(),
@@ -132,17 +135,19 @@ router.post('/', [
             });
         }
         const { title, description, shortDescription, price, originalPrice, duration, level, category, image, videoPreview, instructors, materials = [], requirements = [], outcomes = [], lessons = [], } = req.body;
-        // Check if instructors exist
-        const instructorUsers = await User_1.User.find({
-            _id: { $in: instructors },
-            role: 'instructor',
-            isActive: true,
-        });
-        if (instructorUsers.length !== instructors.length) {
-            return res.status(400).json({
-                success: false,
-                error: 'Some instructors not found or inactive',
+        // Проверяем преподавателей только если они переданы
+        if (Array.isArray(instructors) && instructors.length > 0) {
+            const instructorUsers = await User_1.User.find({
+                _id: { $in: instructors },
+                role: 'instructor',
+                isActive: true,
             });
+            if (instructorUsers.length !== instructors.length) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Some instructors not found or inactive',
+                });
+            }
         }
         const course = new Course_1.Course({
             title,
@@ -155,7 +160,7 @@ router.post('/', [
             category,
             image,
             videoPreview,
-            instructors,
+            instructors: Array.isArray(instructors) ? instructors : [],
             materials,
             requirements,
             outcomes,

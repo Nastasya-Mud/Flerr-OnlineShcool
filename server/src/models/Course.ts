@@ -89,7 +89,8 @@ const courseSchema = new Schema<ICourse>({
   },
   originalPrice: {
     type: Number,
-    required: [true, 'Original price is required'],
+    // Делается необязательным: может отсутствовать, если нет скидки
+    required: false,
     min: [0, 'Original price cannot be negative'],
   },
   duration: {
@@ -115,10 +116,11 @@ const courseSchema = new Schema<ICourse>({
     type: String,
   },
   lessons: [lessonSchema],
+  // Преподаватели теперь необязательны при создании курса
   instructors: [{
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'At least one instructor is required'],
+    required: false,
   }],
   materials: [{
     type: String,

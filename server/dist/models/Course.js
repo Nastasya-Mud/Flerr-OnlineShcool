@@ -93,7 +93,8 @@ const courseSchema = new mongoose_1.Schema({
     },
     originalPrice: {
         type: Number,
-        required: [true, 'Original price is required'],
+        // Делается необязательным: может отсутствовать, если нет скидки
+        required: false,
         min: [0, 'Original price cannot be negative'],
     },
     duration: {
@@ -119,10 +120,11 @@ const courseSchema = new mongoose_1.Schema({
         type: String,
     },
     lessons: [lessonSchema],
+    // Преподаватели теперь необязательны при создании курса
     instructors: [{
             type: mongoose_1.Schema.Types.ObjectId,
             ref: 'User',
-            required: [true, 'At least one instructor is required'],
+            required: false,
         }],
     materials: [{
             type: String,

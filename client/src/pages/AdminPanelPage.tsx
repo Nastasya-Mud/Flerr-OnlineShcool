@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { coursesAPI } from '../api/courses';
 import { usersAPI } from '../api/users';
+import CreateCourseModal from '../components/Modal/CreateCourseModal';
 
 const Container = styled(motion.div)`
   min-height: 100vh;
@@ -243,6 +244,7 @@ const AdminPanelPage: React.FC = () => {
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCreateCourseModalOpen, setIsCreateCourseModalOpen] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalCourses: 0,
@@ -310,6 +312,42 @@ const AdminPanelPage: React.FC = () => {
     
     loadData();
   }, []);
+
+  const handleCourseCreated = () => {
+    // Перезагружаем данные после создания курса
+    const loadData = async () => {
+      try {
+        const [usersResponse, coursesResponse] = await Promise.all([
+          usersAPI.getAll().catch((error) => {
+            console.error('Users API error:', error);
+            return { data: [] };
+          }),
+          coursesAPI.getAll().catch((error) => {
+            console.error('Courses API error:', error);
+            return { data: [] };
+          })
+        ]);
+        
+        const usersData = Array.isArray(usersResponse?.data) ? usersResponse.data : [];
+        const coursesData = Array.isArray(coursesResponse?.data) ? coursesResponse.data : [];
+        
+        setUsers(usersData);
+        setCourses(coursesData);
+        
+        setStats({
+          totalUsers: usersData.length,
+          totalCourses: coursesData.length,
+          totalInstructors: usersData.filter((u: any) => u?.role === 'instructor').length,
+          totalSuppliers: 0
+        });
+        
+      } catch (error) {
+        console.error('Error reloading data:', error);
+      }
+    };
+    
+    loadData();
+  };
 
   const tabs = [
     { id: 'users', label: 'Пользователи', icon: Users },
@@ -443,7 +481,7 @@ const AdminPanelPage: React.FC = () => {
                   <Filter size={18} />
                   Фильтры
                 </Button>
-                <Button $variant="primary">
+                <Button $variant="primary" onClick={() => setIsCreateCourseModalOpen(true)}>
                   <Plus size={18} />
                   Добавить курс
                 </Button>
@@ -473,7 +511,7 @@ const AdminPanelPage: React.FC = () => {
                   <TableRow>
                     <TableCell colSpan={5}>
                       <EmptyState>
-                        <p>Курсы не найдены. <button onClick={() => toast('Функция добавления курсов скоро будет доступна')}>Добавить первый курс</button></p>
+                        <p>Курсы не найдены. <button onClick={() => setIsCreateCourseModalOpen(true)} style={{ color: '#667eea', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}>Добавить первый курс</button></p>
                       </EmptyState>
                     </TableCell>
                   </TableRow>
@@ -566,6 +604,12 @@ const AdminPanelPage: React.FC = () => {
           </TabContent>
         </TabsContainer>
       </Dashboard>
+      
+      <CreateCourseModal 
+        isOpen={isCreateCourseModalOpen}
+        onClose={() => setIsCreateCourseModalOpen(false)}
+        onSuccess={handleCourseCreated}
+      />
     </Container>
   );
 };

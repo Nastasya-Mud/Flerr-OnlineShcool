@@ -126,16 +126,18 @@ router.post('/', [
   auth,
   body('title').isString().trim().notEmpty().withMessage('Title is required'),
   body('description').isString().trim().notEmpty().withMessage('Description is required'),
-  body('shortDescription').isString().trim().notEmpty().withMessage('Short description is required'),
-  body('price').isFloat({ min: 0 }).withMessage('Valid price is required'),
+  // Делаем необязательным — если не задано, возьмем из title
+  body('shortDescription').optional({ nullable: true }).isString().trim(),
+  // Цена может отсутствовать — по умолчанию 0
+  body('price').optional({ nullable: true }).isFloat({ min: 0 }).withMessage('Valid price is required'),
   // originalPrice может отсутствовать
   body('originalPrice').optional({ nullable: true }).isFloat({ min: 0 }).withMessage('Valid original price is required'),
-  body('duration').isString().trim().notEmpty().withMessage('Duration is required'),
+  body('duration').optional({ nullable: true }).isString().trim(),
   body('level').isIn(['beginner', 'intermediate', 'advanced']).withMessage('Valid level is required'),
   body('category').isString().trim().notEmpty().withMessage('Category is required'),
   // image: пока как строка (URL либо data URL). Позже можно заменить на upload
   // Принимаем как URL строку либо data URL (base64). Просто проверим на непустую строку
-  body('image').isString().trim().notEmpty().withMessage('Image is required'),
+  body('image').optional({ nullable: true }).isString().trim().withMessage('Image is required'),
   // instructors делаем необязательным
   body('instructors').optional({ nullable: true }).isArray().withMessage('Instructors must be an array'),
   body('instructors.*').optional().isMongoId().withMessage('Valid instructor IDs are required'),
@@ -173,7 +175,9 @@ router.post('/', [
 
     // Нормализация значений по умолчанию
     if (!shortDescription) shortDescription = title;
+    if (price == null) price = 0;
     if (originalPrice == null) originalPrice = price;
+    if (!duration) duration = '4 weeks';
 
     // Проверяем преподавателей только если они переданы
     if (Array.isArray(instructors) && instructors.length > 0) {

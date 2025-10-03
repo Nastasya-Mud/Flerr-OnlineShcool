@@ -66,7 +66,15 @@ const courseSchema = new Schema<ICourse>({
   },
   slug: {
     type: String,
-    required: [true, 'Course slug is required'],
+    // Генерируем автоматически из title, поэтому не требуем в запросе
+    required: false,
+    default: function(this: any) {
+      const title: string = (this.title || '').toString();
+      return title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+    },
     unique: true,
     lowercase: true,
     trim: true,

@@ -153,7 +153,7 @@ router.post('/', [
       });
     }
 
-    const {
+    let {
       title,
       description,
       shortDescription,
@@ -170,6 +170,10 @@ router.post('/', [
       outcomes = [],
       lessons = [],
     } = req.body;
+
+    // Нормализация значений по умолчанию
+    if (!shortDescription) shortDescription = title;
+    if (originalPrice == null) originalPrice = price;
 
     // Проверяем преподавателей только если они переданы
     if (Array.isArray(instructors) && instructors.length > 0) {
@@ -214,10 +218,16 @@ router.post('/', [
       success: true,
       data: populatedCourse,
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.name === 'ValidationError') {
+      const details = Object.values(error.errors).map((e: any) => ({ field: e.path, message: e.message }));
+      return res.status(400).json({ success: false, error: 'Validation failed', details });
+    }
+    console.error('Create course error:', error?.message || error);
     res.status(500).json({
       success: false,
       error: 'Server error',
+      message: error?.message,
     });
   }
 });

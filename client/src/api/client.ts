@@ -67,7 +67,11 @@ apiClient.interceptors.response.use(
           }
           break;
         case 500:
-          toast.error('Server error. Please try again later.');
+          if (data?.message) {
+            toast.error(data.message);
+          } else {
+            toast.error('Server error. Please try again later.');
+          }
           break;
         default:
           toast.error(data.error || 'Something went wrong');

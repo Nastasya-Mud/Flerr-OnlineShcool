@@ -28,7 +28,7 @@ export const coursesAPI = {
 
   // Create course (Admin only)
   create: async (courseData: any): Promise<{ data: Course }> => {
-    const response = await api.post('/courses', courseData);
+    const response = await api.post('/courses', courseData, { timeout: 30000 });
     return { data: response.data.data };
   },
 

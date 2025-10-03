@@ -193,6 +193,34 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({ isOpen, onClose, 
     outcomes: ''
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageDataUrl, setImageDataUrl] = useState<string>('');
+
+  const compressImageToDataUrl = (file: File, maxSize = 1600, quality = 0.8): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = () => {
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let { width, height } = img;
+          const scale = Math.min(1, maxSize / Math.max(width, height));
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return reject(new Error('Canvas unsupported'));
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(dataUrl);
+        };
+        img.onerror = reject;
+        img.src = reader.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -218,15 +246,17 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({ isOpen, onClose, 
     try {
       setLoading(true);
       
-      // Если выбран файл изображения — конвертируем в base64 data URL
+      // Если выбран файл — используем сжатую версию, иначе URL
       let imageValue = formData.image.trim();
       if (imageFile) {
-        imageValue = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(imageFile);
-        });
+        const dataUrl = imageDataUrl || await compressImageToDataUrl(imageFile, 1600, 0.8);
+        imageValue = dataUrl;
+        // Доп.проверка размера (<= 5 МБ)
+        const approxBytes = Math.ceil((dataUrl.length * 3) / 4);
+        if (approxBytes > 5 * 1024 * 1024) {
+          const smaller = await compressImageToDataUrl(imageFile, 1280, 0.7);
+          imageValue = smaller;
+        }
       }
 
       const courseData = {
@@ -267,6 +297,7 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({ isOpen, onClose, 
         outcomes: ''
       });
       setImageFile(null);
+      setImageDataUrl('');
       
     } catch (error: any) {
       console.error('Error creating course:', error);
@@ -394,9 +425,15 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({ isOpen, onClose, 
             <Input
               type="file"
               accept="image/*"
-              onChange={(e) => {
+              onChange={async (e) => {
                 const file = e.target.files?.[0] || null;
                 setImageFile(file);
+                if (file) {
+                  const dataUrl = await compressImageToDataUrl(file, 1600, 0.8);
+                  setImageDataUrl(dataUrl);
+                } else {
+                  setImageDataUrl('');
+                }
               }}
             />
             <small style={{ color: '#718096' }}>Можно загрузить файл или оставить пустым и указать URL ниже</small>

@@ -75,10 +75,13 @@ router.get('/', [
         hasPrev: pageNum > 1,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
+    // Логируем и возвращаем сообщение для диагностики
+    console.error('Create course error:', error?.message || error);
     res.status(500).json({
       success: false,
       error: 'Server error',
+      message: error?.message,
     });
   }
 });
@@ -131,6 +134,7 @@ router.post('/', [
   body('level').isIn(['beginner', 'intermediate', 'advanced']).withMessage('Valid level is required'),
   body('category').isString().trim().notEmpty().withMessage('Category is required'),
   // image: пока как строка (URL либо data URL). Позже можно заменить на upload
+  // Принимаем как URL строку либо data URL (base64). Просто проверим на непустую строку
   body('image').isString().trim().notEmpty().withMessage('Image is required'),
   // instructors делаем необязательным
   body('instructors').optional({ nullable: true }).isArray().withMessage('Instructors must be an array'),

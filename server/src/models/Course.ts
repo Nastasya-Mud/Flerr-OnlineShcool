@@ -167,9 +167,9 @@ courseSchema.virtual('discount').get(function() {
   return 0;
 });
 
-// Middleware для создания slug из названия
-courseSchema.pre('save', function(next) {
-  if (this.isModified('title') && !this.slug) {
+// Генерируем slug до валидации, чтобы обязательность slug не падала
+courseSchema.pre('validate', function(next) {
+  if (!this.slug && this.title) {
     this.slug = this.title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')

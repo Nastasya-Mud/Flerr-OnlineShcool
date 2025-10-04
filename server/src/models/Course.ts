@@ -1,5 +1,31 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
+// Утилиты для генерации slug с поддержкой кириллицы и безопасной нормализацией
+function transliterateToLatin(input: string): string {
+  const map: Record<string, string> = {
+    а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z', и: 'i',
+    й: 'y', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't',
+    у: 'u', ф: 'f', х: 'h', ц: 'c', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y',
+    ь: '', э: 'e', ю: 'yu', я: 'ya',
+    А: 'a', Б: 'b', В: 'v', Г: 'g', Д: 'd', Е: 'e', Ё: 'e', Ж: 'zh', З: 'z', И: 'i',
+    Й: 'y', К: 'k', Л: 'l', М: 'm', Н: 'n', О: 'o', П: 'p', Р: 'r', С: 's', Т: 't',
+    У: 'u', Ф: 'f', Х: 'h', Ц: 'c', Ч: 'ch', Ш: 'sh', Щ: 'sch', Ъ: '', Ы: 'y',
+    Ь: '', Э: 'e', Ю: 'yu', Я: 'ya',
+  };
+  return input.split('').map(ch => map[ch] ?? ch).join('');
+}
+
+function toSlugBase(input: string): string {
+  const latin = transliterateToLatin(input)
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '');
+  return latin
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .substring(0, 80);
+}
+
 export interface ILesson {
   title: string;
   description: string;
@@ -70,10 +96,8 @@ const courseSchema = new Schema<ICourse>({
     required: false,
     default: function(this: any) {
       const title: string = (this.title || '').toString();
-      return title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
+      const base = toSlugBase(title);
+      return base || `course-${Date.now()}`;
     },
     unique: true,
     lowercase: true,
@@ -175,14 +199,29 @@ courseSchema.virtual('discount').get(function() {
   return 0;
 });
 
-// Генерируем slug до валидации, чтобы обязательность slug не падала
+// Генерация slug до валидации
 courseSchema.pre('validate', function(next) {
   if (!this.slug && this.title) {
-    this.slug = this.title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+    const base = toSlugBase(this.title);
+    this.slug = base || `course-${Date.now()}`;
   }
+  next();
+});
+
+// Гарантируем уникальность slug: при коллизии добавляем суффикс -2, -3, ...
+courseSchema.pre('save', async function(next) {
+  if (!this.isModified('slug')) return next();
+  const base = toSlugBase(this.slug || this.title || '');
+  let candidate = base || `course-${Date.now()}`;
+  let counter = 2;
+
+  while (await mongoose.models.Course.findOne({ slug: candidate, _id: { $ne: this._id } })) {
+    candidate = `${base}-${counter}`;
+    counter += 1;
+    if (counter > 100) break; // защита от бесконечного цикла
+  }
+
+  this.slug = candidate;
   next();
 });
 

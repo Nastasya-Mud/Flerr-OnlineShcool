@@ -5,7 +5,9 @@ export const usersAPI = {
   // Get all users (Admin only)
   getAll: async (params?: any): Promise<{ data: User[] }> => {
     const response = await api.get('/users', { params });
-    return { data: response.data.data };
+    // API возвращает { data: { users, pagination } }
+    const data = response.data?.data?.users || response.data?.data || [];
+    return { data };
   },
 
   // Get user by ID (Admin only)
@@ -24,5 +26,13 @@ export const usersAPI = {
   delete: async (id: string): Promise<{ data: { message: string } }> => {
     const response = await api.delete(`/users/${id}`);
     return { data: { message: response.data.message } };
+  },
+
+  // Get only instructors (Admin only)
+  getInstructors: async (params?: any): Promise<{ data: User[] }> => {
+    const merged = { role: 'instructor', limit: 100, ...(params || {}) };
+    const response = await api.get('/users', { params: merged });
+    const data = response.data?.data?.users || response.data?.data || [];
+    return { data };
   }
 };

@@ -16,6 +16,7 @@ import {
 import { coursesAPI } from '../api/courses';
 import { usersAPI } from '../api/users';
 import CreateCourseModal from '../components/Modal/CreateCourseModal';
+import CreateInstructorModal from '../components/Modal/CreateInstructorModal';
 
 const Container = styled(motion.div)`
   min-height: 100vh;
@@ -245,6 +246,7 @@ const AdminPanelPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateCourseModalOpen, setIsCreateCourseModalOpen] = useState(false);
+  const [isCreateInstructorModalOpen, setIsCreateInstructorModalOpen] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalCourses: 0,
@@ -539,6 +541,27 @@ const AdminPanelPage: React.FC = () => {
             </Table>
           </div>
         );
+      case 'instructors':
+        return (
+          <div>
+            <ActionBar>
+              <SearchContainer>
+                <SearchIcon />
+                <SearchInput placeholder="Поиск преподавателей..." />
+              </SearchContainer>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <Button $variant="primary" onClick={() => setIsCreateInstructorModalOpen(true)}>
+                  <Plus size={18} />
+                  Добавить преподавателя
+                </Button>
+              </div>
+            </ActionBar>
+
+            <EmptyState>
+              <p>Список преподавателей появится после добавления.</p>
+            </EmptyState>
+          </div>
+        );
       
       default:
         return (
@@ -608,6 +631,11 @@ const AdminPanelPage: React.FC = () => {
       <CreateCourseModal 
         isOpen={isCreateCourseModalOpen}
         onClose={() => setIsCreateCourseModalOpen(false)}
+        onSuccess={handleCourseCreated}
+      />
+      <CreateInstructorModal
+        isOpen={isCreateInstructorModalOpen}
+        onClose={() => setIsCreateInstructorModalOpen(false)}
         onSuccess={handleCourseCreated}
       />
     </Container>

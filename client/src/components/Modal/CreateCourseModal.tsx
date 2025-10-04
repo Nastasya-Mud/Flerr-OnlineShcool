@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { coursesAPI } from '../../api/courses';
+import { usersAPI } from '../../api/users';
 
 const Overlay = styled(motion.div)`
   position: fixed;
@@ -194,6 +195,20 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({ isOpen, onClose, 
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageDataUrl, setImageDataUrl] = useState<string>('');
+  const [instructors, setInstructors] = useState<{ _id: string; firstName?: string; lastName?: string; email: string }[]>([]);
+  const [selectedInstructorIds, setSelectedInstructorIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const loadInstructors = async () => {
+      try {
+        const res = await usersAPI.getInstructors({ limit: 100 });
+        setInstructors(res.data || []);
+      } catch (e) {
+        // без тостов, чтобы не мешать созданию курса
+      }
+    };
+    loadInstructors();
+  }, []);
 
   const compressImageToDataUrl = (file: File, maxSize = 1600, quality = 0.8): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -269,7 +284,7 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({ isOpen, onClose, 
         level: formData.level,
         category: formData.category,
         image: imageValue || 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800',
-        instructors: [],
+        instructors: selectedInstructorIds,
         materials: formData.materials ? formData.materials.split('\n').map(m => m.trim()).filter(Boolean) : [],
         requirements: formData.requirements ? formData.requirements.split('\n').map(r => r.trim()).filter(Boolean) : ['Желание учиться'],
         outcomes: formData.outcomes ? formData.outcomes.split('\n').map(o => o.trim()).filter(Boolean) : []
@@ -298,6 +313,7 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({ isOpen, onClose, 
       });
       setImageFile(null);
       setImageDataUrl('');
+      setSelectedInstructorIds([]);
       
     } catch (error: any) {
       console.error('Error creating course:', error);
@@ -388,6 +404,25 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({ isOpen, onClose, 
                   />
                 </FormGroup>
               </Row>
+
+              <FormGroup>
+                <Label>Преподаватели (необязательно)</Label>
+                <Select
+                  multiple
+                  value={selectedInstructorIds}
+                  onChange={(e) => {
+                    const options = Array.from(e.target.selectedOptions).map(o => o.value);
+                    setSelectedInstructorIds(options);
+                  }}
+                >
+                  {instructors.map((i) => (
+                    <option key={i._id} value={i._id}>
+                      {(i.firstName || '') + ' ' + (i.lastName || '') || i.email}
+                    </option>
+                  ))}
+                </Select>
+                <small style={{ color: '#718096' }}>Зажмите Ctrl/Command для выбора нескольких</small>
+              </FormGroup>
 
               <Row>
                 <FormGroup>

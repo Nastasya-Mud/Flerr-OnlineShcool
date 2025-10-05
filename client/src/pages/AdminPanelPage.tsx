@@ -16,6 +16,7 @@ import {
 import { coursesAPI } from '../api/courses';
 import { usersAPI } from '../api/users';
 import CreateCourseModal from '../components/Modal/CreateCourseModal';
+import CreateUserModal from '../components/Modal/CreateUserModal';
 import CreateInstructorModal from '../components/Modal/CreateInstructorModal';
 
 const Container = styled(motion.div)`
@@ -246,6 +247,7 @@ const AdminPanelPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateCourseModalOpen, setIsCreateCourseModalOpen] = useState(false);
+  const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
   const [isCreateInstructorModalOpen, setIsCreateInstructorModalOpen] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -402,7 +404,7 @@ const AdminPanelPage: React.FC = () => {
                   <Filter size={18} />
                   Фильтры
                 </Button>
-                <Button $variant="primary">
+                <Button $variant="primary" onClick={() => setIsCreateUserModalOpen(true)}>
                   <Plus size={18} />
                   Добавить пользователя
                 </Button>
@@ -631,6 +633,11 @@ const AdminPanelPage: React.FC = () => {
       <CreateCourseModal 
         isOpen={isCreateCourseModalOpen}
         onClose={() => setIsCreateCourseModalOpen(false)}
+        onSuccess={handleCourseCreated}
+      />
+      <CreateUserModal
+        isOpen={isCreateUserModalOpen}
+        onClose={() => setIsCreateUserModalOpen(false)}
         onSuccess={handleCourseCreated}
       />
       <CreateInstructorModal

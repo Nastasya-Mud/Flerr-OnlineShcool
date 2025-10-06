@@ -205,7 +205,8 @@ const CreateInstructorModal: React.FC<CreateInstructorModalProps> = ({ isOpen, o
     if (!isOpen) return;
     const load = async () => {
       try {
-        const res = await usersAPI.getAll({ role: 'instructor', limit: 200 });
+        // Загружаем всех пользователей, чтобы можно было выбрать и студента
+        const res = await usersAPI.getAll({ limit: 200 });
         setUsers(res.data || []);
       } catch (e) {
         // ignore
@@ -221,6 +222,19 @@ const CreateInstructorModal: React.FC<CreateInstructorModalProps> = ({ isOpen, o
 
     try {
       setLoading(true);
+      // Если выбранный пользователь не instructor — повысим роль автоматически
+      const selectedUser = users.find(u => u._id === form.userId);
+      if (selectedUser && selectedUser.role !== 'instructor') {
+        try {
+          await usersAPI.update(form.userId, { role: 'instructor', isActive: true });
+        } catch (e) {
+          // Если не удалось сменить роль — продолжать нельзя, backend потребует instructor
+          toast.error('Не удалось назначить роль преподавателя пользователю');
+          setLoading(false);
+          return;
+        }
+      }
+
       const payload = {
         userId: form.userId,
         bio: form.bio.trim(),

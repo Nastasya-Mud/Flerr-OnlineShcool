@@ -238,18 +238,18 @@ const CreateInstructorModal: React.FC<CreateInstructorModalProps> = ({ isOpen, o
       const payload = {
         userId: form.userId,
         bio: form.bio.trim(),
-        experience: Number(form.experience) || 0,
-        specialties: form.specialties,
-        education: form.education ? form.education.split('\n').map(s => s.trim()).filter(Boolean) : ['Флористическое образование'],
-        certifications: form.certifications ? form.certifications.split('\n').map(s => s.trim()).filter(Boolean) : [],
-        achievements: form.achievements ? form.achievements.split('\n').map(s => s.trim()).filter(Boolean) : [],
+        experience: Number(form.experience) || undefined,
+        specialties: form.specialties.length ? form.specialties : undefined,
+        education: form.education ? form.education.split('\n').map(s => s.trim()).filter(Boolean) : undefined,
+        certifications: form.certifications ? form.certifications.split('\n').map(s => s.trim()).filter(Boolean) : undefined,
+        achievements: form.achievements ? form.achievements.split('\n').map(s => s.trim()).filter(Boolean) : undefined,
         socialMedia: {
           instagram: form.instagram || undefined,
           facebook: form.facebook || undefined,
           website: form.website || undefined,
           youtube: form.youtube || undefined,
         },
-        featured: !!form.featured,
+        featured: form.featured ? true : undefined,
       };
       await instructorsAPI.create(payload);
       toast.success('Профиль преподавателя создан');

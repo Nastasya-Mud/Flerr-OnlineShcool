@@ -116,9 +116,10 @@ router.post('/', [
   requireRole(['admin']),
   body('userId').isMongoId(),
   body('bio').isString().trim().isLength({ min: 50, max: 1000 }),
-  body('experience').isInt({ min: 0, max: 50 }),
-  body('specialties').isArray({ min: 1 }),
-  body('specialties.*').isIn([
+  body('experience').optional().isInt({ min: 0, max: 50 }),
+  // Делаем specialties и education необязательными, заполним значениями по умолчанию
+  body('specialties').optional().isArray(),
+  body('specialties.*').optional().isIn([
     'wedding-floristry',
     'commercial-floristry',
     'interior-compositions',
@@ -135,8 +136,8 @@ router.post('/', [
     'eco-floristry',
     'sustainable-floristry'
   ]),
-  body('education').isArray({ min: 1 }),
-  body('education.*').isString().trim(),
+  body('education').optional().isArray(),
+  body('education.*').optional().isString().trim(),
   body('certifications').optional().isArray(),
   body('certifications.*').isString().trim(),
   body('achievements').optional().isArray(),
@@ -176,9 +177,21 @@ router.post('/', [
       });
     }
     
+    // Нормализация и значения по умолчанию
+    const normalized: any = { ...instructorData };
+    if (!Array.isArray(normalized.specialties) || normalized.specialties.length === 0) {
+      normalized.specialties = ['modern-floristry'];
+    }
+    if (!Array.isArray(normalized.education) || normalized.education.length === 0) {
+      normalized.education = ['Флористическое образование'];
+    }
+    if (!Array.isArray(normalized.certifications)) normalized.certifications = [];
+    if (!Array.isArray(normalized.achievements)) normalized.achievements = [];
+    normalized.experience = Number(normalized.experience) || 0;
+
     const instructor = new Instructor({
       user: userId,
-      ...instructorData,
+      ...normalized,
     });
     
     await instructor.save();

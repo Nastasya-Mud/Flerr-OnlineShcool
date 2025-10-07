@@ -644,6 +644,7 @@ const AdminPanelPage: React.FC = () => {
         isOpen={isCreateInstructorModalOpen}
         onClose={() => setIsCreateInstructorModalOpen(false)}
         onSuccess={handleCourseCreated}
+        usersPrefetch={users}
       />
     </Container>
   );

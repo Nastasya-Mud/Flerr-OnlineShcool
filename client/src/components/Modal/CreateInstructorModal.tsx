@@ -163,6 +163,7 @@ interface CreateInstructorModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  usersPrefetch?: any[]; // опционально передаём уже загруженных пользователей из админки
 }
 
 const SPECIALTIES = [
@@ -183,7 +184,7 @@ const SPECIALTIES = [
   'sustainable-floristry'
 ];
 
-const CreateInstructorModal: React.FC<CreateInstructorModalProps> = ({ isOpen, onClose, onSuccess }) => {
+const CreateInstructorModal: React.FC<CreateInstructorModalProps> = ({ isOpen, onClose, onSuccess, usersPrefetch }) => {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
   const [form, setForm] = useState({
@@ -203,9 +204,13 @@ const CreateInstructorModal: React.FC<CreateInstructorModalProps> = ({ isOpen, o
 
   useEffect(() => {
     if (!isOpen) return;
+    // Если нам уже передали пользователей — используем их
+    if (Array.isArray(usersPrefetch) && usersPrefetch.length > 0) {
+      setUsers(usersPrefetch);
+      return;
+    }
     const load = async () => {
       try {
-        // Загружаем всех пользователей, чтобы можно было выбрать и студента
         const res = await usersAPI.getAll({ limit: 200 });
         setUsers(res.data || []);
       } catch (e) {
@@ -213,7 +218,7 @@ const CreateInstructorModal: React.FC<CreateInstructorModalProps> = ({ isOpen, o
       }
     };
     load();
-  }, [isOpen]);
+  }, [isOpen, usersPrefetch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

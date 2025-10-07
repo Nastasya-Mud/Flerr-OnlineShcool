@@ -6,6 +6,11 @@ export const instructorsAPI = {
     const data = response.data?.data?.instructors || response.data?.data || [];
     return { data };
   },
+  getFeatured: async (): Promise<{ data: any[] }> => {
+    const response = await api.get('/instructors/featured/list');
+    const data = response.data?.data || [];
+    return { data };
+  },
   getById: async (id: string): Promise<{ data: any }> => {
     const response = await api.get(`/instructors/${id}`);
     return { data: response.data?.data };

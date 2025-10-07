@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
 import { ArrowRight, Play, Star, Users, Award, BookOpen } from 'lucide-react';
+import { coursesAPI } from '../api/courses';
+import { instructorsAPI } from '../api/instructors';
 
 const HeroSection = styled.section`
   background: linear-gradient(135deg, var(--color-background) 0%, var(--color-background-secondary) 100%);
@@ -221,6 +223,9 @@ const ViewButton = styled(Link)`
 `;
 
 const HomePage: React.FC = () => {
+  const [popularCourses, setPopularCourses] = useState<any[]>([]);
+  const [featuredInstructors, setFeaturedInstructors] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const features = [
     {
       icon: <BookOpen size={32} />,
@@ -246,26 +251,21 @@ const HomePage: React.FC = () => {
     { number: '95%', label: 'Довольных клиентов' },
   ];
 
-  const courses = [
-    {
-      title: 'Профессия флорист',
-      description: 'Базовый курс для начинающих флористов',
-      price: '29,900 ₽',
-      image: '🌺',
-    },
-    {
-      title: 'Флорист-дизайнер',
-      description: 'Продвинутый курс для создания уникальных композиций',
-      price: '39,900 ₽',
-      image: '🌸',
-    },
-    {
-      title: 'Свадебная флористика',
-      description: 'Специализация на свадебных букетах и декоре',
-      price: '24,900 ₽',
-      image: '🌹',
-    },
-  ];
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [coursesRes, featuredRes] = await Promise.all([
+          coursesAPI.getAll({ limit: 6, sort: 'createdAt', order: 'desc' }).catch(() => ({ data: [] })),
+          instructorsAPI.getFeatured().catch(() => ({ data: [] })),
+        ]);
+        setPopularCourses(Array.isArray(coursesRes.data) ? coursesRes.data : []);
+        setFeaturedInstructors(Array.isArray(featuredRes.data) ? featuredRes.data : []);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   return (
     <>
@@ -345,7 +345,7 @@ const HomePage: React.FC = () => {
         <div className="container">
           <SectionTitle>Популярные курсы</SectionTitle>
           <CoursesGrid>
-            {courses.map((course, index) => (
+            {(loading ? [] : popularCourses).map((course: any, index: number) => (
               <CourseCard
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
@@ -353,11 +353,13 @@ const HomePage: React.FC = () => {
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 viewport={{ once: true }}
               >
-                <CourseImage>{course.image}</CourseImage>
+                <CourseImage>
+                  <img src={course.image} alt={course.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </CourseImage>
                 <CourseContent>
                   <CourseTitle>{course.title}</CourseTitle>
-                  <CourseDescription>{course.description}</CourseDescription>
-                  <CoursePrice>{course.price}</CoursePrice>
+                  <CourseDescription>{course.shortDescription || course.description}</CourseDescription>
+                  <CoursePrice>{course.price ? `${course.price} ₽` : 'Бесплатно'}</CoursePrice>
                   <ViewButton to="/courses">
                     Подробнее
                     <ArrowRight size={16} />
@@ -368,6 +370,31 @@ const HomePage: React.FC = () => {
           </CoursesGrid>
         </div>
       </CoursesPreviewSection>
+
+      {featuredInstructors.length > 0 && (
+        <CoursesPreviewSection>
+          <div className="container">
+            <SectionTitle>Наши преподаватели</SectionTitle>
+            <CoursesGrid>
+              {featuredInstructors.map((inst: any, index: number) => (
+                <CourseCard key={inst._id || index} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: index * 0.1 }} viewport={{ once: true }}>
+                  <CourseImage>
+                    <img src={inst?.user?.avatar || 'https://via.placeholder.com/300x200?text=Instructor'} alt={inst?.user?.firstName || 'Инструктор'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </CourseImage>
+                  <CourseContent>
+                    <CourseTitle>{`${inst?.user?.firstName || ''} ${inst?.user?.lastName || ''}`.trim() || 'Преподаватель'}</CourseTitle>
+                    <CourseDescription>{inst.bio?.slice(0, 140) || 'Преподаватель школы Flerr'}</CourseDescription>
+                    <ViewButton to="/instructors">
+                      Все преподаватели
+                      <ArrowRight size={16} />
+                    </ViewButton>
+                  </CourseContent>
+                </CourseCard>
+              ))}
+            </CoursesGrid>
+          </div>
+        </CoursesPreviewSection>
+      )}
     </>
   );
 };

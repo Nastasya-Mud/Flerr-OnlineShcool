@@ -122,7 +122,8 @@ router.put('/:id', [
   body('firstName').optional().isString().trim().isLength({ min: 2, max: 50 }),
   body('lastName').optional().isString().trim().isLength({ min: 2, max: 50 }),
   body('phone').optional().isString().trim(),
-  body('avatar').optional().isURL(),
+  // Разрешаем URL или data URL (base64), поэтому просто проверим что строка
+  body('avatar').optional().isString().trim(),
   body('isActive').optional().isBoolean(),
   body('role').optional().isIn(['student', 'admin', 'instructor']),
 ], validateRequest, async (req: Request, res) => {

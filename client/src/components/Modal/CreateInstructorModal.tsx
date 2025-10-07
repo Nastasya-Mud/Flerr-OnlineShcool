@@ -195,6 +195,8 @@ const CreateInstructorModal: React.FC<CreateInstructorModalProps> = ({ isOpen, o
     education: '' as string,
     certifications: '' as string,
     achievements: '' as string,
+    avatarFile: null as File | null,
+    avatarPreview: '' as string,
     instagram: '',
     facebook: '',
     website: '',
@@ -227,6 +229,11 @@ const CreateInstructorModal: React.FC<CreateInstructorModalProps> = ({ isOpen, o
 
     try {
       setLoading(true);
+      // Если загружено фото — сжимаем и готовим к отправке
+      let avatarBase64: string | undefined = undefined;
+      if (form.avatarFile) {
+        avatarBase64 = await compressImage(form.avatarFile, 1024, 0.8);
+      }
       // Если выбранный пользователь не instructor — повысим роль автоматически
       const selectedUser = users.find(u => u._id === form.userId);
       if (selectedUser && selectedUser.role !== 'instructor') {
@@ -237,6 +244,15 @@ const CreateInstructorModal: React.FC<CreateInstructorModalProps> = ({ isOpen, o
           toast.error('Не удалось назначить роль преподавателя пользователю');
           setLoading(false);
           return;
+        }
+      }
+
+      // Если есть аватар — обновляем профиль пользователя
+      if (avatarBase64) {
+        try {
+          await usersAPI.update(form.userId, { avatar: avatarBase64 });
+        } catch (e) {
+          // не блокируем из-за аватара
         }
       }
 
@@ -260,12 +276,40 @@ const CreateInstructorModal: React.FC<CreateInstructorModalProps> = ({ isOpen, o
       toast.success('Профиль преподавателя создан');
       onSuccess();
       onClose();
-      setForm({ userId: '', bio: '', experience: 0, specialties: [], education: '', certifications: '', achievements: '', instagram: '', facebook: '', website: '', youtube: '', featured: false });
+      setForm({ userId: '', bio: '', experience: 0, specialties: [], education: '', certifications: '', achievements: '', avatarFile: null, avatarPreview: '', instagram: '', facebook: '', website: '', youtube: '', featured: false });
     } catch (error: any) {
       toast.error(error?.response?.data?.error || 'Ошибка создания преподавателя');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Сжатие изображения в base64
+  const compressImage = (file: File, maxSize = 1024, quality = 0.8): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = () => {
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = (img as HTMLImageElement).width;
+          let height = (img as HTMLImageElement).height;
+          const scale = Math.min(1, maxSize / Math.max(width, height));
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return reject(new Error('Canvas unsupported'));
+          ctx.drawImage(img as CanvasImageSource, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = reject;
+        img.src = reader.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   };
 
   return (
@@ -303,6 +347,28 @@ const CreateInstructorModal: React.FC<CreateInstructorModalProps> = ({ isOpen, o
                   </Select>
                 </FormGroup>
               </FormRow>
+
+              <FormGroup>
+                <Label>Фото преподавателя (опционально)</Label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0] || null;
+                    setForm(prev => ({ ...prev, avatarFile: file }));
+                    if (file) {
+                      const preview = await compressImage(file, 320, 0.7);
+                      setForm(prev => ({ ...prev, avatarPreview: preview }));
+                    } else {
+                      setForm(prev => ({ ...prev, avatarPreview: '' }));
+                    }
+                  }}
+                />
+                {form.avatarPreview && (
+                  <img src={form.avatarPreview} alt="Предпросмотр" style={{ width: 96, height: 96, borderRadius: 12, marginTop: 8, objectFit: 'cover', border: '1px solid #e2e8f0' }} />
+                )}
+                <small style={{ color: '#718096' }}>Изображение сжимается и сохраняется в профиле пользователя</small>
+              </FormGroup>
 
               <FormGroup>
                 <Label>Образование (каждое с новой строки)</Label>

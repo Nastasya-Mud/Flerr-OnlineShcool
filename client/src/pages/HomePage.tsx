@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { ArrowRight, Play, Star, Users, Award, BookOpen } from 'lucide-react';
 import { coursesAPI } from '../api/courses';
 import { instructorsAPI } from '../api/instructors';
+import WorksCarousel from '../components/Carousel/WorksCarousel';
 
 const HeroSection = styled.section`
   /* Бежево‑сливочный фон с мягкими переливами */
@@ -173,9 +174,9 @@ const SectionTitle = styled.h2`
 
 const CoursesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: var(--spacing-xl);
-  max-width: 1200px;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: calc(var(--spacing-xl) * 1.2);
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 var(--spacing-md);
 `;
@@ -188,13 +189,13 @@ const CourseCard = styled(motion.div)`
   transition: var(--transition-normal);
   
   &:hover {
-    transform: translateY(-5px);
+    transform: translateY(-6px);
     box-shadow: var(--shadow-lg);
   }
 `;
 
 const CourseImage = styled.div`
-  height: 200px;
+  height: 260px;
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   display: flex;
   align-items: center;
@@ -203,7 +204,7 @@ const CourseImage = styled.div`
   font-size: 1.5rem;
   font-weight: 600;
   overflow: hidden;
-  img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+  img { width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: saturate(1.05) contrast(1.03); }
 `;
 
 const CourseContent = styled.div`
@@ -286,6 +287,13 @@ const HomePage: React.FC = () => {
     };
     load();
   }, []);
+
+  const showcase = [
+    { id: '1', image: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200' },
+    { id: '2', image: 'https://images.unsplash.com/photo-1508182311256-e3f7d50f2c07?w=1200' },
+    { id: '3', image: 'https://images.unsplash.com/photo-1511988617509-a57c8a288659?w=1200' },
+    { id: '4', image: 'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=1200' },
+  ];
 
   return (
     <>
@@ -415,6 +423,14 @@ const HomePage: React.FC = () => {
           </div>
         </CoursesPreviewSection>
       )}
+
+      {/* Карусель работ */}
+      <CoursesPreviewSection>
+        <div className="container">
+          <SectionTitle>Работы наших студентов</SectionTitle>
+          <WorksCarousel items={showcase} />
+        </div>
+      </CoursesPreviewSection>
     </>
   );
 };

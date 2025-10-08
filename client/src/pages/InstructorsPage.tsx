@@ -157,7 +157,7 @@ const InstructorCard = styled(motion.div)`
 
 const InstructorHeader = styled.div`
   position: relative;
-  height: 200px;
+  height: 240px;
   background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-background-secondary) 100%);
   display: flex;
   align-items: center;
@@ -165,8 +165,8 @@ const InstructorHeader = styled.div`
 `;
 
 const InstructorAvatar = styled.div<{ $imageUrl: string }>`
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
   background: white;
   overflow: hidden;
@@ -179,7 +179,9 @@ const InstructorAvatar = styled.div<{ $imageUrl: string }>`
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* центрируем и кадрируем */
+    object-fit: cover;
+    object-position: top center; /* фокус выше — лица виднее */
+    filter: saturate(1.05) contrast(1.03);
   }
 `;
 

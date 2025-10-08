@@ -18,6 +18,7 @@ import { usersAPI } from '../api/users';
 import CreateCourseModal from '../components/Modal/CreateCourseModal';
 import CreateUserModal from '../components/Modal/CreateUserModal';
 import CreateInstructorModal from '../components/Modal/CreateInstructorModal';
+import { instructorsAPI } from '../api/instructors';
 
 const Container = styled(motion.div)`
   min-height: 100vh;
@@ -244,6 +245,7 @@ const AdminPanelPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('users');
   const [users, setUsers] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
+  const [instructors, setInstructors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateCourseModalOpen, setIsCreateCourseModalOpen] = useState(false);
@@ -263,7 +265,7 @@ const AdminPanelPage: React.FC = () => {
         console.log('Loading admin panel data...');
         
         // Загружаем пользователей и курсы параллельно с более надежной обработкой ошибок
-        const [usersResponse, coursesResponse] = await Promise.all([
+        const [usersResponse, coursesResponse, instructorsResponse] = await Promise.all([
           usersAPI.getAll().catch((error) => {
             console.error('Users API error:', error);
             return { data: [] };
@@ -271,7 +273,11 @@ const AdminPanelPage: React.FC = () => {
           coursesAPI.getAll().catch((error) => {
             console.error('Courses API error:', error);
             return { data: [] };
-          })
+          }),
+          instructorsAPI.getAll().catch((error) => {
+            console.error('Instructors API error:', error);
+            return { data: [] };
+          }),
         ]);
         
         console.log('Users response:', usersResponse);
@@ -280,15 +286,17 @@ const AdminPanelPage: React.FC = () => {
         // Защита от undefined/null данных
         const usersData = Array.isArray(usersResponse?.data) ? usersResponse.data : [];
         const coursesData = Array.isArray(coursesResponse?.data) ? coursesResponse.data : [];
+        const instructorsData = Array.isArray(instructorsResponse?.data) ? instructorsResponse.data : [];
         
         setUsers(usersData);
         setCourses(coursesData);
+        setInstructors(instructorsData);
         
         // Обновляем статистику
         setStats({
           totalUsers: usersData.length,
           totalCourses: coursesData.length,
-          totalInstructors: usersData.filter((u: any) => u?.role === 'instructor').length,
+          totalInstructors: instructorsData.length,
           totalSuppliers: 0 // TODO: добавить после реализации API поставщиков
         });
         
@@ -303,6 +311,7 @@ const AdminPanelPage: React.FC = () => {
         // Устанавливаем пустые массивы в случае ошибки
         setUsers([]);
         setCourses([]);
+        setInstructors([]);
         setStats({
           totalUsers: 0,
           totalCourses: 0,
@@ -321,7 +330,7 @@ const AdminPanelPage: React.FC = () => {
     // Перезагружаем данные после создания курса
     const loadData = async () => {
       try {
-        const [usersResponse, coursesResponse] = await Promise.all([
+        const [usersResponse, coursesResponse, instructorsResponse] = await Promise.all([
           usersAPI.getAll().catch((error) => {
             console.error('Users API error:', error);
             return { data: [] };
@@ -329,19 +338,25 @@ const AdminPanelPage: React.FC = () => {
           coursesAPI.getAll().catch((error) => {
             console.error('Courses API error:', error);
             return { data: [] };
-          })
+          }),
+          instructorsAPI.getAll().catch((error) => {
+            console.error('Instructors API error:', error);
+            return { data: [] };
+          }),
         ]);
         
         const usersData = Array.isArray(usersResponse?.data) ? usersResponse.data : [];
         const coursesData = Array.isArray(coursesResponse?.data) ? coursesResponse.data : [];
+        const instructorsData = Array.isArray(instructorsResponse?.data) ? instructorsResponse.data : [];
         
         setUsers(usersData);
         setCourses(coursesData);
+        setInstructors(instructorsData);
         
         setStats({
           totalUsers: usersData.length,
           totalCourses: coursesData.length,
-          totalInstructors: usersData.filter((u: any) => u?.role === 'instructor').length,
+          totalInstructors: instructorsData.length,
           totalSuppliers: 0
         });
         
@@ -559,9 +574,48 @@ const AdminPanelPage: React.FC = () => {
               </div>
             </ActionBar>
 
-            <EmptyState>
-              <p>Список преподавателей появится после добавления.</p>
-            </EmptyState>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHeaderCell>Имя</TableHeaderCell>
+                  <TableHeaderCell>Email</TableHeaderCell>
+                  <TableHeaderCell>Опыт</TableHeaderCell>
+                  <TableHeaderCell>Featured</TableHeaderCell>
+                </TableRow>
+              </TableHeader>
+              <tbody>
+                {loading ? (
+                  <TableRow><TableCell colSpan={4}><EmptyState>Загрузка...</EmptyState></TableCell></TableRow>
+                ) : instructors.length === 0 ? (
+                  <TableRow><TableCell colSpan={4}><EmptyState>Преподаватели не найдены</EmptyState></TableCell></TableRow>
+                ) : (
+                  instructors.map((i: any) => (
+                    <TableRow key={i._id}>
+                      <TableCell>{`${i?.user?.firstName || ''} ${i?.user?.lastName || ''}`.trim()}</TableCell>
+                      <TableCell>{i?.user?.email}</TableCell>
+                      <TableCell>{i?.experience ?? 0}</TableCell>
+                      <TableCell>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                          <input
+                            type="checkbox"
+                            checked={!!i?.featured}
+                            onChange={async (e) => {
+                              try {
+                                const updated = await instructorsAPI.update(i._id, { featured: e.target.checked });
+                                setInstructors(prev => prev.map(x => x._id === i._id ? updated.data : x));
+                              } catch (err) {
+                                // ignore
+                              }
+                            }}
+                          />
+                          Показать на главной
+                        </label>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </tbody>
+            </Table>
           </div>
         );
       

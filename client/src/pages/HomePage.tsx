@@ -184,6 +184,8 @@ const CourseImage = styled.div`
   color: white;
   font-size: 1.5rem;
   font-weight: 600;
+  overflow: hidden;
+  img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
 `;
 
 const CourseContent = styled.div`

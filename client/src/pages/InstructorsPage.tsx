@@ -478,27 +478,33 @@ const InstructorsPage: React.FC = () => {
                   {instructor.featured && (
                     <FeaturedBadge>Ведущий специалист</FeaturedBadge>
                   )}
-                  <InstructorAvatar $imageUrl={instructor.avatar}>
-                    {instructor.avatar && <img src={instructor.avatar} alt={instructor.name} />}
-                  </InstructorAvatar>
+                  {(() => {
+                    const avatar = instructor?.user?.avatar || '';
+                    const fullName = `${instructor?.user?.firstName || ''} ${instructor?.user?.lastName || ''}`.trim();
+                    return (
+                      <InstructorAvatar $imageUrl={avatar}>
+                        {avatar && <img src={avatar} alt={fullName || 'Преподаватель'} />}
+                      </InstructorAvatar>
+                    );
+                  })()}
                 </InstructorHeader>
                 
                 <InstructorInfo>
-                  <InstructorName>{instructor.name}</InstructorName>
-                  <InstructorTitle>{instructor.title}</InstructorTitle>
-                  <InstructorBio>{instructor.bio}</InstructorBio>
+                  <InstructorName>{`${instructor?.user?.firstName || ''} ${instructor?.user?.lastName || ''}`.trim()}</InstructorName>
+                  <InstructorTitle>{(instructor?.specialties?.[0] || '').replace(/-/g, ' ')}</InstructorTitle>
+                  <InstructorBio>{instructor?.bio}</InstructorBio>
                   
                   <InstructorStats>
                     <div className="stat">
-                      <div className="number">{instructor.experience}</div>
+                      <div className="number">{instructor?.experience ?? 0}</div>
                       <div className="label">лет опыта</div>
                     </div>
                     <div className="stat">
-                      <div className="number">{instructor.studentsCount}</div>
+                      <div className="number">{instructor?.totalStudents ?? 0}</div>
                       <div className="label">студентов</div>
                     </div>
                     <div className="stat">
-                      <div className="number">{instructor.coursesCount}</div>
+                      <div className="number">{instructor?.totalCourses ?? 0}</div>
                       <div className="label">курсов</div>
                     </div>
                   </InstructorStats>
@@ -506,15 +512,15 @@ const InstructorsPage: React.FC = () => {
                   <InstructorMeta>
                     <span>
                       <Star size={16} />
-                      {instructor.rating}
+                      {instructor?.rating ?? 0}
                     </span>
                     <span>
                       <MapPin size={16} />
-                      {instructor.location}
+                      {instructor?.location || '—'}
                     </span>
                     <span>
                       <Award size={16} />
-                      {instructor.specialization}
+                      {(instructor?.specialties?.[0] || '').replace(/-/g, ' ')}
                     </span>
                   </InstructorMeta>
                   

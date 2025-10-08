@@ -18,6 +18,7 @@ import { usersAPI } from '../api/users';
 import CreateCourseModal from '../components/Modal/CreateCourseModal';
 import CreateUserModal from '../components/Modal/CreateUserModal';
 import CreateInstructorModal from '../components/Modal/CreateInstructorModal';
+import EditInstructorModal from '../components/Modal/EditInstructorModal';
 import { instructorsAPI } from '../api/instructors';
 
 const Container = styled(motion.div)`
@@ -251,6 +252,7 @@ const AdminPanelPage: React.FC = () => {
   const [isCreateCourseModalOpen, setIsCreateCourseModalOpen] = useState(false);
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
   const [isCreateInstructorModalOpen, setIsCreateInstructorModalOpen] = useState(false);
+  const [editingInstructor, setEditingInstructor] = useState<any | null>(null);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalCourses: 0,
@@ -587,7 +589,7 @@ const AdminPanelPage: React.FC = () => {
                 {loading ? (
                   <TableRow><TableCell colSpan={4}><EmptyState>Загрузка...</EmptyState></TableCell></TableRow>
                 ) : instructors.length === 0 ? (
-                  <TableRow><TableCell colSpan={4}><EmptyState>Преподаватели не найдены</EmptyState></TableCell></TableRow>
+                  <TableRow><TableCell colSpan={5}><EmptyState>Преподаватели не найдены</EmptyState></TableCell></TableRow>
                 ) : (
                   instructors.map((i: any) => (
                     <TableRow key={i._id}>
@@ -610,6 +612,9 @@ const AdminPanelPage: React.FC = () => {
                           />
                           Показать на главной
                         </label>
+                      </TableCell>
+                      <TableCell>
+                        <Button $variant="secondary" onClick={() => setEditingInstructor(i)}>Редактировать</Button>
                       </TableCell>
                     </TableRow>
                   ))
@@ -699,6 +704,12 @@ const AdminPanelPage: React.FC = () => {
         onClose={() => setIsCreateInstructorModalOpen(false)}
         onSuccess={handleCourseCreated}
         usersPrefetch={users}
+      />
+      <EditInstructorModal
+        isOpen={!!editingInstructor}
+        onClose={() => setEditingInstructor(null)}
+        onSuccess={handleCourseCreated}
+        instructor={editingInstructor}
       />
     </Container>
   );

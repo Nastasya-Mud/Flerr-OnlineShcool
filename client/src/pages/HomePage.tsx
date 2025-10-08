@@ -7,21 +7,39 @@ import { coursesAPI } from '../api/courses';
 import { instructorsAPI } from '../api/instructors';
 
 const HeroSection = styled.section`
-  background: linear-gradient(135deg, var(--color-background) 0%, var(--color-background-secondary) 100%);
-  padding: var(--spacing-xxl) 0;
+  /* Бежево‑сливочный фон с мягкими переливами */
+  background: radial-gradient(1200px 600px at 10% 0%, rgba(240, 219, 155, 0.22), transparent 60%),
+              radial-gradient(1200px 600px at 90% 10%, rgba(214, 199, 221, 0.22), transparent 60%),
+              var(--color-background);
+  padding: calc(var(--spacing-xxl) + 40px) 0 var(--spacing-xxl) 0;
+  min-height: 70vh;
   text-align: center;
   position: relative;
   overflow: hidden;
   
+  /* Полупрозрачная ботаническая иллюстрация у нижней кромки */
   &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 0 0;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 600' preserveAspectRatio='xMidYMax slice'><defs><linearGradient id='g1' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='rgba(168,106,164,0.16)'/><stop offset='100%' stop-color='rgba(168,106,164,0)'/></linearGradient><linearGradient id='g2' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='rgba(232,208,137,0.18)'/><stop offset='100%' stop-color='rgba(232,208,137,0)'/></linearGradient></defs><g fill='none' stroke='url(%23g1)' stroke-width='3' stroke-linecap='round'><path d='M80 600 C120 520,100 440,70 360'/> <path d='M160 600 C210 480,180 400,160 320'/> <path d='M260 600 C310 500,300 420,300 320'/> <path d='M380 600 C420 520,420 440,420 320'/> <path d='M520 600 C560 520,560 430,540 330'/> <path d='M700 600 C740 520,740 430,720 330'/> <path d='M860 600 C900 520,900 430,880 330'/> <path d='M1040 600 C1080 520,1080 430,1060 330'/> <path d='M1220 600 C1260 520,1260 430,1240 330'/></g><g fill='url(%23g2)'><circle cx='210' cy='360' r='20'/><circle cx='600' cy='340' r='18'/><circle cx='980' cy='370' r='16'/><circle cx='1240' cy='350' r='14'/></g></svg>");
+    background-repeat: no-repeat;
+    background-position: bottom center;
+    background-size: cover;
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  
+  /* Мягкий белёсый градиент сверху для лучшей читабельности заголовков */
+  &::after {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="petals" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="2" fill="%23E6E6FA" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23petals)"/></svg>');
-    opacity: 0.5;
+    height: 40%;
+    background: linear-gradient(to bottom, rgba(250, 248, 246, 0.85), rgba(250, 248, 246, 0));
+    pointer-events: none;
   }
 `;
 

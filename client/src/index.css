@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
 
 * {
   margin: 0;
@@ -7,27 +7,27 @@
 }
 
 :root {
-  /* Colors */
-  --color-primary: #800080;
-  --color-secondary: #B4A5A5;
-  --color-accent: #E6E6FA;
-  --color-background: #F8F7FF;
-  --color-background-secondary: #E6E6FA;
-  --color-background-tertiary: #F0F0FF;
-  --color-text: #2D1B3D;
-  --color-text-light: #6B4E71;
-  --color-text-muted: #9B8BA5;
+  /* Colors - природная мягкая палитра */
+  --color-primary: #A86AA4;                /* лилово-розовый */
+  --color-secondary: #C3B8CC;              /* сиренево-серый */
+  --color-accent: #E8D089;                 /* пыльный жёлтый */
+  --color-background: #FAF8F6;             /* светлый тёплый фон */
+  --color-background-secondary: #F5EDE3;   /* тёплый беж */
+  --color-background-tertiary: #F2EEF4;    /* светлый сиреневый */
+  --color-text: #2F2A2E;                   /* глубокий нейтральный */
+  --color-text-light: #6E676C;             /* мягкий серо-сливовый */
+  --color-text-muted: #9C939B;             /* приглушённый */
   --color-success: #4CAF50;
   --color-warning: #FF9800;
   --color-error: #F44336;
   --color-info: #2196F3;
-  --color-hover-primary: #E0DCFF;
-  --color-hover-secondary: #A595A5;
-  --color-hover-accent: #D0C0FF;
+  --color-hover-primary: #B98DB6;          /* осветлённый primary */
+  --color-hover-secondary: #D2C9D8;        /* осветлённый secondary */
+  --color-hover-accent: #F0DB9D;           /* осветлённый accent */
 
   /* Typography */
-  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-secondary: 'Playfair Display', Georgia, serif;
+  --font-primary: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-secondary: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -44,10 +44,10 @@
   --border-radius-xl: 1.5rem;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.1), 0 6px 6px rgba(0, 0, 0, 0.06);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 6px rgba(0,0,0,.06);
+  --shadow-md: 0 6px 18px rgba(0,0,0,.08);
+  --shadow-lg: 0 14px 28px rgba(0,0,0,.10);
+  --shadow-xl: 0 24px 48px rgba(0,0,0,.12);
 
   /* Transitions */
   --transition-fast: all 0.15s ease-in-out;

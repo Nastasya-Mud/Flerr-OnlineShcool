@@ -8,6 +8,7 @@ import {
   BookOpen, Clock, Heart, Share2, ChevronRight
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { instructorsAPI } from '../api/instructors';
 
 const Container = styled.div`
   padding: var(--spacing-xxl) 0;
@@ -168,11 +169,18 @@ const InstructorAvatar = styled.div<{ $imageUrl: string }>`
   height: 120px;
   border-radius: 50%;
   background: white;
-  background-image: ${props => props.$imageUrl ? `url(${props.$imageUrl})` : 'none'};
-  background-size: cover;
-  background-position: center;
+  overflow: hidden;
   border: 4px solid white;
   box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* центрируем и кадрируем */
+  }
 `;
 
 const InstructorInfo = styled.div`
@@ -337,152 +345,41 @@ const InstructorsPage: React.FC = () => {
   const [experienceFilter, setExperienceFilter] = useState('');
   const [specializationFilter, setSpecializationFilter] = useState('');
 
-  // Моковые данные для демонстрации
-  const mockInstructors = [
-    {
-      _id: '1',
-      name: 'Анна Петрова',
-      title: 'Ведущий флорист',
-      avatar: '/images/instructor-1.jpg',
-      bio: 'Профессиональный флорист с 10-летним опытом работы. Основатель студии "Цветочная мастерская". Специализируется на свадебной флористике и интерьерных композициях.',
-      experience: 10,
-      rating: 4.9,
-      studentsCount: 156,
-      coursesCount: 8,
-      specialization: 'Свадебная флористика',
-      location: 'Москва',
-      isFeatured: true,
-      socialMedia: {
-        instagram: '@anna_florist',
-        facebook: 'anna.petrovna',
-        website: 'www.annaflorist.com'
-      }
-    },
-    {
-      _id: '2',
-      name: 'Мария Сидорова',
-      title: 'Флорист-дизайнер',
-      avatar: '/images/instructor-2.jpg',
-      bio: 'Дизайнер с художественным образованием. Создает уникальные композиции из сухих и искусственных цветов. Автор курса "Интерьерные композиции".',
-      experience: 8,
-      rating: 4.8,
-      studentsCount: 98,
-      coursesCount: 5,
-      specialization: 'Интерьерные композиции',
-      location: 'Санкт-Петербург',
-      isFeatured: false,
-      socialMedia: {
-        instagram: '@maria_design',
-        facebook: 'maria.sidorova',
-        website: 'www.mariadesign.ru'
-      }
-    },
-    {
-      _id: '3',
-      name: 'Елена Козлова',
-      title: 'Коммерческий флорист',
-      avatar: '/images/instructor-3.jpg',
-      bio: 'Эксперт по коммерческой флористике. Помогает начинающим флористам открыть свой бизнес. Автор популярного курса "Коммерческий флорист".',
-      experience: 12,
-      rating: 4.9,
-      studentsCount: 203,
-      coursesCount: 12,
-      specialization: 'Коммерческая флористика',
-      location: 'Москва',
-      isFeatured: true,
-      socialMedia: {
-        instagram: '@elena_commercial',
-        facebook: 'elena.kozlovna',
-        website: 'www.elenaflorist.ru'
-      }
-    },
-    {
-      _id: '4',
-      name: 'Ольга Иванова',
-      title: 'Мастер свадебной флористики',
-      avatar: '/images/instructor-4.jpg',
-      bio: 'Специалист по свадебной флористике с международным опытом. Работала в Италии и Франции. Создает роскошные свадебные композиции.',
-      experience: 15,
-      rating: 5.0,
-      studentsCount: 89,
-      coursesCount: 6,
-      specialization: 'Свадебная флористика',
-      location: 'Казань',
-      isFeatured: false,
-      socialMedia: {
-        instagram: '@olga_wedding',
-        facebook: 'olga.ivanova',
-        website: 'www.olgawedding.ru'
-      }
-    },
-    {
-      _id: '5',
-      name: 'Татьяна Смирнова',
-      title: 'Флорист-преподаватель',
-      avatar: '/images/instructor-5.jpg',
-      bio: 'Опытный преподаватель с педагогическим образованием. Специализируется на обучении начинающих флористов. Автор методических пособий.',
-      experience: 7,
-      rating: 4.7,
-      studentsCount: 134,
-      coursesCount: 9,
-      specialization: 'Обучение флористике',
-      location: 'Екатеринбург',
-      isFeatured: false,
-      socialMedia: {
-        instagram: '@tatiana_teach',
-        facebook: 'tatiana.smirnova',
-        website: 'www.tatianateach.ru'
-      }
-    },
-    {
-      _id: '6',
-      name: 'Ирина Волкова',
-      title: 'Дизайнер интерьерных композиций',
-      avatar: '/images/instructor-6.jpg',
-      bio: 'Художник-дизайнер, специализирующийся на создании интерьерных композиций из сухих цветов. Автор уникальных техник сохранения цветов.',
-      experience: 9,
-      rating: 4.8,
-      studentsCount: 76,
-      coursesCount: 4,
-      specialization: 'Интерьерные композиции',
-      location: 'Новосибирск',
-      isFeatured: false,
-      socialMedia: {
-        instagram: '@irina_interior',
-        facebook: 'irina.volkova',
-        website: 'www.irinainterior.ru'
-      }
-    }
-  ];
-
   useEffect(() => {
-    // Имитация загрузки данных
-    setTimeout(() => {
-      setInstructors(mockInstructors);
-      setLoading(false);
-    }, 1000);
+    const load = async () => {
+      try {
+        const res = await instructorsAPI.getAll({ limit: 50 });
+        setInstructors(res.data || []);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, []);
 
-  const filteredInstructors = instructors.filter(instructor => {
-    const matchesSearch = instructor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         instructor.specialization.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesExperience = !experienceFilter || instructor.experience >= parseInt(experienceFilter);
-    const matchesSpecialization = !specializationFilter || instructor.specialization === specializationFilter;
-    
+  const filteredInstructors = instructors.filter((instructor: any) => {
+    const fullName = `${instructor?.user?.firstName || ''} ${instructor?.user?.lastName || ''}`.trim();
+    const specialization = (instructor?.specialties?.[0] || '').toLowerCase();
+    const matchesSearch = fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         specialization.includes(searchTerm.toLowerCase());
+    const matchesExperience = !experienceFilter || (instructor?.experience ?? 0) >= parseInt(experienceFilter);
+    const matchesSpecialization = !specializationFilter || specialization === specializationFilter.toLowerCase();
     return matchesSearch && matchesExperience && matchesSpecialization;
   });
 
   const handleContact = (instructor: any) => {
-    toast.success(`Связаться с ${instructor.name}`);
+    const fullName = `${instructor?.user?.firstName || ''} ${instructor?.user?.lastName || ''}`.trim();
+    toast.success(`Связаться с ${fullName || 'преподавателем'}`);
   };
 
   const handleViewProfile = (instructor: any) => {
-    toast(`Переход к профилю ${instructor.name}`);
+    const fullName = `${instructor?.user?.firstName || ''} ${instructor?.user?.lastName || ''}`.trim();
+    toast(`Профиль ${fullName || 'преподавателя'}`);
   };
 
   const totalInstructors = instructors.length;
-  const featuredInstructors = instructors.filter(i => i.isFeatured).length;
-  const averageRating = (instructors.reduce((sum, i) => sum + i.rating, 0) / instructors.length).toFixed(1);
+  const featuredInstructors = instructors.filter((i: any) => i.featured).length;
+  const averageRating = instructors.length ? (instructors.reduce((sum: number, i: any) => sum + (i.rating || 0), 0) / instructors.length) : 0;
 
   if (loading) {
     return (
@@ -578,10 +475,12 @@ const InstructorsPage: React.FC = () => {
                 layout
               >
                 <InstructorHeader>
-                  {instructor.isFeatured && (
+                  {instructor.featured && (
                     <FeaturedBadge>Ведущий специалист</FeaturedBadge>
                   )}
-                  <InstructorAvatar $imageUrl={instructor.avatar} />
+                  <InstructorAvatar $imageUrl={instructor.avatar}>
+                    {instructor.avatar && <img src={instructor.avatar} alt={instructor.name} />}
+                  </InstructorAvatar>
                 </InstructorHeader>
                 
                 <InstructorInfo>

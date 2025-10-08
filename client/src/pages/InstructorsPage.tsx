@@ -144,10 +144,10 @@ const InstructorsGrid = styled.div`
 
 const InstructorCard = styled(motion.div)`
   background: white;
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-md);
+  border-radius: calc(var(--border-radius-lg) + 4px);
+  box-shadow: 0 4px 12px rgba(217,119,87,0.08), 0 2px 4px rgba(244,162,97,0.05);
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   
   &:hover {
     transform: translateY(-4px);
@@ -157,21 +157,21 @@ const InstructorCard = styled(motion.div)`
 
 const InstructorHeader = styled.div`
   position: relative;
-  height: 240px;
-  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-background-secondary) 100%);
+  height: 250px;
+  background: linear-gradient(135deg, var(--color-salmon) 0%, var(--color-dusty-pink) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
 `;
 
 const InstructorAvatar = styled.div<{ $imageUrl: string }>`
-  width: 140px;
-  height: 140px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   background: white;
   overflow: hidden;
-  border: 4px solid white;
-  box-shadow: var(--shadow-md);
+  border: 5px solid white;
+  box-shadow: 0 6px 18px rgba(217,119,87,0.18);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,8 +180,8 @@ const InstructorAvatar = styled.div<{ $imageUrl: string }>`
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: top center; /* фокус выше — лица виднее */
-    filter: saturate(1.05) contrast(1.03);
+    object-position: top center;
+    filter: saturate(1.08) contrast(1.04);
   }
 `;
 

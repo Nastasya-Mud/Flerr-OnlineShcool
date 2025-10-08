@@ -4,9 +4,9 @@ import styled from 'styled-components';
 import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from 'lucide-react';
 
 const FooterContainer = styled.footer`
-  background: var(--color-background-secondary);
-  border-top: 1px solid var(--color-background-tertiary);
-  padding: var(--spacing-xxl) 0 var(--spacing-lg);
+  background: var(--color-background);
+  border-top: 1px solid rgba(217,119,87,0.12);
+  padding: calc(var(--spacing-xxl) + var(--spacing-lg)) 0 var(--spacing-xl);
   margin-top: auto;
 `;
 
@@ -28,13 +28,16 @@ const FooterSection = styled.div`
   h3 {
     color: var(--color-primary);
     margin-bottom: var(--spacing-md);
-    font-size: 1.25rem;
+    font-size: 1.3rem;
+    font-family: var(--font-secondary);
+    font-weight: 600;
   }
   
   p {
     color: var(--color-text-light);
-    line-height: 1.6;
+    line-height: 1.7;
     margin-bottom: var(--spacing-sm);
+    font-size: 0.95rem;
   }
   
   ul {
@@ -49,10 +52,11 @@ const FooterSection = styled.div`
   a {
     color: var(--color-text-light);
     text-decoration: none;
-    transition: var(--transition-fast);
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     
     &:hover {
       color: var(--color-primary);
+      transform: translateX(3px);
     }
   }
 `;
@@ -79,16 +83,18 @@ const SocialLinks = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: var(--color-primary);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
     color: white;
-    transition: var(--transition-fast);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 10px rgba(217,119,87,0.2);
     
     &:hover {
-      background: var(--color-hover-primary);
-      transform: translateY(-2px);
+      background: linear-gradient(135deg, var(--color-hover-primary) 0%, var(--color-hover-secondary) 100%);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 8px 18px rgba(217,119,87,0.3);
     }
   }
 `;

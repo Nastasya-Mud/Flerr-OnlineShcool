@@ -8,38 +8,42 @@ import { instructorsAPI } from '../api/instructors';
 import WorksCarousel from '../components/Carousel/WorksCarousel';
 
 const HeroSection = styled.section`
-  /* Бежево‑сливочный фон с мягкими переливами */
-  background: radial-gradient(1200px 600px at 10% 0%, rgba(240, 219, 155, 0.22), transparent 60%),
-              radial-gradient(1200px 600px at 90% 10%, rgba(214, 199, 221, 0.22), transparent 60%),
+  /* Живые персиковые и терракотовые переливы */
+  background: radial-gradient(1400px 700px at 10% -5%, rgba(244,162,97,0.18), transparent 60%),
+              radial-gradient(1200px 600px at 90% 10%, rgba(217,119,87,0.15), transparent 60%),
+              radial-gradient(1000px 500px at 50% 100%, rgba(168,218,220,0.12), transparent 60%),
               var(--color-background);
-  padding: calc(var(--spacing-xxl) + 40px) 0 var(--spacing-xxl) 0;
-  min-height: 70vh;
+  padding: calc(var(--spacing-xxl) + 60px) 0 calc(var(--spacing-xxl) + 20px) 0;
+  min-height: 75vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   position: relative;
   overflow: hidden;
   
-  /* Полупрозрачная ботаническая иллюстрация у нижней кромки */
+  /* Ботанические стебли у нижней кромки (терракотовые и персиковые) */
   &::before {
     content: '';
     position: absolute;
     inset: 0 0 0 0;
-    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 600' preserveAspectRatio='xMidYMax slice'><defs><linearGradient id='g1' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='rgba(168,106,164,0.16)'/><stop offset='100%' stop-color='rgba(168,106,164,0)'/></linearGradient><linearGradient id='g2' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='rgba(232,208,137,0.18)'/><stop offset='100%' stop-color='rgba(232,208,137,0)'/></linearGradient></defs><g fill='none' stroke='url(%23g1)' stroke-width='3' stroke-linecap='round'><path d='M80 600 C120 520,100 440,70 360'/> <path d='M160 600 C210 480,180 400,160 320'/> <path d='M260 600 C310 500,300 420,300 320'/> <path d='M380 600 C420 520,420 440,420 320'/> <path d='M520 600 C560 520,560 430,540 330'/> <path d='M700 600 C740 520,740 430,720 330'/> <path d='M860 600 C900 520,900 430,880 330'/> <path d='M1040 600 C1080 520,1080 430,1060 330'/> <path d='M1220 600 C1260 520,1260 430,1240 330'/></g><g fill='url(%23g2)'><circle cx='210' cy='360' r='20'/><circle cx='600' cy='340' r='18'/><circle cx='980' cy='370' r='16'/><circle cx='1240' cy='350' r='14'/></g></svg>");
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 600' preserveAspectRatio='xMidYMax slice'><defs><linearGradient id='g1' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='rgba(217,119,87,0.12)'/><stop offset='100%' stop-color='rgba(217,119,87,0)'/></linearGradient><linearGradient id='g2' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='rgba(244,162,97,0.14)'/><stop offset='100%' stop-color='rgba(244,162,97,0)'/></linearGradient></defs><g fill='none' stroke='url(%23g1)' stroke-width='2.5' stroke-linecap='round' opacity='0.7'><path d='M80 600 C120 520,100 440,70 360'/> <path d='M160 600 C210 480,180 400,160 320'/> <path d='M280 600 C330 500,320 420,320 320'/> <path d='M420 600 C460 520,460 440,440 320'/> <path d='M580 600 C620 520,620 430,600 330'/> <path d='M760 600 C800 520,800 430,780 330'/> <path d='M940 600 C980 520,980 430,960 330'/> <path d='M1120 600 C1160 520,1160 430,1140 330'/> <path d='M1300 600 C1340 520,1340 430,1320 330'/></g><g fill='url(%23g2)' opacity='0.6'><circle cx='210' cy='360' r='22'/><circle cx='640' cy='340' r='20'/><circle cx='1020' cy='370' r='18'/><circle cx='1280' cy='350' r='16'/></g></svg>");
     background-repeat: no-repeat;
     background-position: bottom center;
     background-size: cover;
-    opacity: 0.7;
+    opacity: 0.85;
     pointer-events: none;
   }
   
-  /* Мягкий белёсый градиент сверху для лучшей читабельности заголовков */
+  /* Лёгкая дымка сверху для читабельности текста */
   &::after {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 40%;
-    background: linear-gradient(to bottom, rgba(250, 248, 246, 0.85), rgba(250, 248, 246, 0));
+    height: 35%;
+    background: linear-gradient(to bottom, rgba(250,246,242,0.8), rgba(250,246,242,0));
     pointer-events: none;
   }
 `;
@@ -53,42 +57,48 @@ const HeroContent = styled.div`
 `;
 
 const HeroTitle = styled(motion.h1)`
-  font-size: 3.5rem;
+  font-size: 4rem;
   font-weight: 700;
   color: var(--color-text);
   margin-bottom: var(--spacing-lg);
-  line-height: 1.2;
+  line-height: 1.15;
+  font-family: var(--font-secondary);
+  letter-spacing: -0.02em;
   
   @media (max-width: 768px) {
-    font-size: 2.5rem;
+    font-size: 2.75rem;
   }
 `;
 
 const HeroSubtitle = styled(motion.p)`
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   color: var(--color-text-light);
-  margin-bottom: var(--spacing-xl);
-  line-height: 1.6;
+  margin-bottom: calc(var(--spacing-xl) + var(--spacing-md));
+  line-height: 1.7;
+  font-weight: 400;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
 `;
 
 const CTAButton = styled(motion(Link))`
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-xl);
+  padding: calc(var(--spacing-md) + 2px) calc(var(--spacing-xl) + var(--spacing-sm));
   background: var(--color-primary);
   color: white;
   text-decoration: none;
   border-radius: var(--border-radius-lg);
   font-weight: 600;
-  font-size: 1.125rem;
-  transition: var(--transition-fast);
-  box-shadow: var(--shadow-md);
+  font-size: 1.15rem;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 8px 20px rgba(217,119,87,0.25);
   
   &:hover {
     background: var(--color-hover-primary);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 14px 32px rgba(217,119,87,0.35);
   }
 `;
 
@@ -161,15 +171,18 @@ const StatItem = styled(motion.div)`
 `;
 
 const CoursesPreviewSection = styled.section`
-  padding: var(--spacing-xxl) 0;
-  background: white;
+  padding: calc(var(--spacing-xxl) + var(--spacing-lg)) 0;
+  background: var(--color-background);
 `;
 
 const SectionTitle = styled.h2`
   text-align: center;
-  font-size: 2.5rem;
+  font-size: 2.75rem;
+  font-family: var(--font-secondary);
   color: var(--color-text);
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: calc(var(--spacing-xl) + var(--spacing-md));
+  font-weight: 600;
+  letter-spacing: -0.01em;
 `;
 
 const CoursesGrid = styled.div`
@@ -182,15 +195,15 @@ const CoursesGrid = styled.div`
 `;
 
 const CourseCard = styled(motion.div)`
-  background: var(--color-background);
-  border-radius: var(--border-radius-lg);
+  background: white;
+  border-radius: calc(var(--border-radius-lg) + 4px);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition-normal);
+  box-shadow: 0 4px 12px rgba(217,119,87,0.08), 0 2px 4px rgba(244,162,97,0.05);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   
   &:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-8px);
+    box-shadow: 0 16px 36px rgba(217,119,87,0.15), 0 8px 12px rgba(244,162,97,0.1);
   }
 `;
 
@@ -208,22 +221,26 @@ const CourseImage = styled.div`
 `;
 
 const CourseContent = styled.div`
-  padding: var(--spacing-lg);
+  padding: calc(var(--spacing-lg) + var(--spacing-sm));
 `;
 
 const CourseTitle = styled.h3`
   color: var(--color-text);
   margin-bottom: var(--spacing-sm);
+  font-size: 1.45rem;
+  font-weight: 600;
 `;
 
 const CourseDescription = styled.p`
   color: var(--color-text-light);
   margin-bottom: var(--spacing-md);
+  font-size: 0.98rem;
+  line-height: 1.6;
 `;
 
 const CoursePrice = styled.div`
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.3rem;
+  font-weight: 700;
   color: var(--color-primary);
   margin-bottom: var(--spacing-md);
 `;
@@ -234,12 +251,13 @@ const ViewButton = styled(Link)`
   gap: var(--spacing-sm);
   color: var(--color-primary);
   text-decoration: none;
-  font-weight: 500;
-  transition: var(--transition-fast);
+  font-weight: 600;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   
   &:hover {
     color: var(--color-hover-primary);
-    gap: var(--spacing-md);
+    gap: calc(var(--spacing-sm) + 4px);
+    transform: translateX(2px);
   }
 `;
 

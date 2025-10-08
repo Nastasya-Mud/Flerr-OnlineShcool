@@ -11,9 +11,9 @@ const HeaderContainer = styled(motion.header)`
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(248, 247, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(230, 230, 250, 0.3);
+  background: rgba(250,246,242,0.92);
+  backdrop-filter: blur(12px) saturate(120%);
+  border-bottom: 1px solid rgba(217,119,87,0.08);
   transition: var(--transition-normal);
 `;
 
@@ -29,14 +29,16 @@ const Nav = styled.nav`
 
 const Logo = styled(Link)`
   font-family: var(--font-secondary);
-  font-size: 1.5rem;
+  font-size: 1.65rem;
   font-weight: 700;
   color: var(--color-primary);
   text-decoration: none;
-  transition: var(--transition-fast);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  letter-spacing: -0.01em;
   
   &:hover {
     color: var(--color-hover-primary);
+    transform: scale(1.03);
   }
 `;
 

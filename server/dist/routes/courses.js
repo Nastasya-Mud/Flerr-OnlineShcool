@@ -66,9 +66,12 @@ router.get('/', [
         });
     }
     catch (error) {
+        // Логируем и возвращаем сообщение для диагностики
+        console.error('Create course error:', error?.message || error);
         res.status(500).json({
             success: false,
             error: 'Server error',
+            message: error?.message,
         });
     }
 });
@@ -109,15 +112,18 @@ router.post('/', [
     auth_1.auth,
     (0, express_validator_1.body)('title').isString().trim().notEmpty().withMessage('Title is required'),
     (0, express_validator_1.body)('description').isString().trim().notEmpty().withMessage('Description is required'),
-    (0, express_validator_1.body)('shortDescription').isString().trim().notEmpty().withMessage('Short description is required'),
-    (0, express_validator_1.body)('price').isFloat({ min: 0 }).withMessage('Valid price is required'),
+    // Делаем необязательным — если не задано, возьмем из title
+    (0, express_validator_1.body)('shortDescription').optional({ nullable: true }).isString().trim(),
+    // Цена может отсутствовать — по умолчанию 0
+    (0, express_validator_1.body)('price').optional({ nullable: true }).isFloat({ min: 0 }).withMessage('Valid price is required'),
     // originalPrice может отсутствовать
     (0, express_validator_1.body)('originalPrice').optional({ nullable: true }).isFloat({ min: 0 }).withMessage('Valid original price is required'),
-    (0, express_validator_1.body)('duration').isString().trim().notEmpty().withMessage('Duration is required'),
+    (0, express_validator_1.body)('duration').optional({ nullable: true }).isString().trim(),
     (0, express_validator_1.body)('level').isIn(['beginner', 'intermediate', 'advanced']).withMessage('Valid level is required'),
     (0, express_validator_1.body)('category').isString().trim().notEmpty().withMessage('Category is required'),
     // image: пока как строка (URL либо data URL). Позже можно заменить на upload
-    (0, express_validator_1.body)('image').isString().trim().notEmpty().withMessage('Image is required'),
+    // Принимаем как URL строку либо data URL (base64). Просто проверим на непустую строку
+    (0, express_validator_1.body)('image').optional({ nullable: true }).isString().trim().withMessage('Image is required'),
     // instructors делаем необязательным
     (0, express_validator_1.body)('instructors').optional({ nullable: true }).isArray().withMessage('Instructors must be an array'),
     (0, express_validator_1.body)('instructors.*').optional().isMongoId().withMessage('Valid instructor IDs are required'),
@@ -134,7 +140,16 @@ router.post('/', [
                 error: 'Access denied. Admin only.',
             });
         }
-        const { title, description, shortDescription, price, originalPrice, duration, level, category, image, videoPreview, instructors, materials = [], requirements = [], outcomes = [], lessons = [], } = req.body;
+        let { title, description, shortDescription, price, originalPrice, duration, level, category, image, videoPreview, instructors, materials = [], requirements = [], outcomes = [], lessons = [], } = req.body;
+        // Нормализация значений по умолчанию
+        if (!shortDescription)
+            shortDescription = title;
+        if (price == null)
+            price = 0;
+        if (originalPrice == null)
+            originalPrice = price;
+        if (!duration)
+            duration = '4 weeks';
         // Проверяем преподавателей только если они переданы
         if (Array.isArray(instructors) && instructors.length > 0) {
             const instructorUsers = await User_1.User.find({
@@ -175,9 +190,15 @@ router.post('/', [
         });
     }
     catch (error) {
+        if (error?.name === 'ValidationError') {
+            const details = Object.values(error.errors).map((e) => ({ field: e.path, message: e.message }));
+            return res.status(400).json({ success: false, error: 'Validation failed', details });
+        }
+        console.error('Create course error:', error?.message || error);
         res.status(500).json({
             success: false,
             error: 'Server error',
+            message: error?.message,
         });
     }
 });

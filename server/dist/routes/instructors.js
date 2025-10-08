@@ -109,9 +109,10 @@ router.post('/', [
     (0, auth_1.requireRole)(['admin']),
     (0, express_validator_1.body)('userId').isMongoId(),
     (0, express_validator_1.body)('bio').isString().trim().isLength({ min: 50, max: 1000 }),
-    (0, express_validator_1.body)('experience').isInt({ min: 0, max: 50 }),
-    (0, express_validator_1.body)('specialties').isArray({ min: 1 }),
-    (0, express_validator_1.body)('specialties.*').isIn([
+    (0, express_validator_1.body)('experience').optional().isInt({ min: 0, max: 50 }),
+    // Делаем specialties и education необязательными, заполним значениями по умолчанию
+    (0, express_validator_1.body)('specialties').optional().isArray(),
+    (0, express_validator_1.body)('specialties.*').optional().isIn([
         'wedding-floristry',
         'commercial-floristry',
         'interior-compositions',
@@ -128,8 +129,8 @@ router.post('/', [
         'eco-floristry',
         'sustainable-floristry'
     ]),
-    (0, express_validator_1.body)('education').isArray({ min: 1 }),
-    (0, express_validator_1.body)('education.*').isString().trim(),
+    (0, express_validator_1.body)('education').optional().isArray(),
+    (0, express_validator_1.body)('education.*').optional().isString().trim(),
     (0, express_validator_1.body)('certifications').optional().isArray(),
     (0, express_validator_1.body)('certifications.*').isString().trim(),
     (0, express_validator_1.body)('achievements').optional().isArray(),
@@ -165,9 +166,22 @@ router.post('/', [
                 error: 'Instructor profile already exists for this user',
             });
         }
+        // Нормализация и значения по умолчанию
+        const normalized = { ...instructorData };
+        if (!Array.isArray(normalized.specialties) || normalized.specialties.length === 0) {
+            normalized.specialties = ['modern-floristry'];
+        }
+        if (!Array.isArray(normalized.education) || normalized.education.length === 0) {
+            normalized.education = ['Флористическое образование'];
+        }
+        if (!Array.isArray(normalized.certifications))
+            normalized.certifications = [];
+        if (!Array.isArray(normalized.achievements))
+            normalized.achievements = [];
+        normalized.experience = Number(normalized.experience) || 0;
         const instructor = new Instructor_1.Instructor({
             user: userId,
-            ...instructorData,
+            ...normalized,
         });
         await instructor.save();
         const populatedInstructor = await Instructor_1.Instructor.findById(instructor._id)

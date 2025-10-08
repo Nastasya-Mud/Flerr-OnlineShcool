@@ -44,8 +44,8 @@ const limiter = (0, express_rate_limit_1.default)({
 });
 app.use('/api/', limiter);
 // Body parsing middleware
-app.use(express_1.default.json({ limit: '10mb' }));
-app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express_1.default.json({ limit: '20mb' }));
+app.use(express_1.default.urlencoded({ extended: true, limit: '20mb' }));
 // Initialize Passport (temporarily disabled)
 // app.use(passport.initialize());
 // Compression middleware

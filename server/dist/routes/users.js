@@ -114,7 +114,8 @@ router.put('/:id', [
     (0, express_validator_1.body)('firstName').optional().isString().trim().isLength({ min: 2, max: 50 }),
     (0, express_validator_1.body)('lastName').optional().isString().trim().isLength({ min: 2, max: 50 }),
     (0, express_validator_1.body)('phone').optional().isString().trim(),
-    (0, express_validator_1.body)('avatar').optional().isURL(),
+    // Разрешаем URL или data URL (base64), поэтому просто проверим что строка
+    (0, express_validator_1.body)('avatar').optional().isString().trim(),
     (0, express_validator_1.body)('isActive').optional().isBoolean(),
     (0, express_validator_1.body)('role').optional().isIn(['student', 'admin', 'instructor']),
 ], validateRequest_1.validateRequest, async (req, res) => {

@@ -72,6 +72,16 @@ body {
   line-height: 1.6;
   color: var(--color-text);
   background-color: var(--color-background);
+  /* Эстетичный фон: тонкий цветочный паттерн + мягкие радиальные переливы */
+  background-image:
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="520" height="520" viewBox="0 0 520 520"><g fill="none" stroke="rgba(168,106,164,0.16)" stroke-width="1.2"><path d="M40,500 C120,380 80,240 60,120"/><path d="M140,520 C220,400 180,240 160,120"/><path d="M260,520 C320,420 300,260 300,120"/><path d="M380,520 C440,420 420,260 420,120"/></g><g fill="rgba(232,208,137,0.12)"><circle cx="120" cy="180" r="12"/><circle cx="260" cy="120" r="10"/><circle cx="340" cy="220" r="9"/><circle cx="200" cy="300" r="11"/></g></svg>'),
+    radial-gradient(1200px 600px at 10% -10%, rgba(184,160,186,0.15), transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, rgba(240,219,155,0.18), transparent 60%),
+    radial-gradient(800px 400px at 50% 120%, rgba(214,199,221,0.18), transparent 60%);
+  background-repeat: repeat, no-repeat, no-repeat, no-repeat;
+  background-size: 520px 520px, auto, auto, auto;
+  background-attachment: fixed, fixed, fixed, fixed;
+  backdrop-filter: saturate(110%);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
